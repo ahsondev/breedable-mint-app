@@ -1,4 +1,3 @@
-const config = require('./config')
 const express = require('./services/express')
 const routes = require('./routes')
 
