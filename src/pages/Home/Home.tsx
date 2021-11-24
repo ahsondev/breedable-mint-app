@@ -1,18 +1,15 @@
 import { useEffect, useState } from 'react'
-import { BrainDance, connectToWallet, getEthBalance } from 'utils/web3_api'
+import { BrainDance, connectToWallet } from 'utils/web3_api'
 import { NotificationManager } from 'components/Notification'
 import Loader from 'components/Loader'
-import contractConfig from 'contracts/config.json'
 import queryString from 'query-string'
-import moment from 'moment'
-import { encrypt, decrypt, getStorageItem } from 'utils/helper'
+import { encrypt, getStorageItem, setStorageItem } from 'utils/helper'
 import api from 'utils/api'
-import {
-  GoogleReCaptchaProvider,
-  GoogleReCaptcha
-} from 'react-google-recaptcha-v3';
+import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import MintButton from 'components/MintButton'
 import './Home.scoped.scss'
+import AuthSelectorModal from 'pages/AuthSelectorModal'
+import MintModal from 'pages/MintModal'
 
 const wnd = window as any
 
@@ -27,44 +24,55 @@ const Home = (props: Props) => {
   const [web3, setWeb3] = useState<any>(null)
   const [contract, setContract] = useState<BrainDance>(new BrainDance())
   const [isWhiteList, setIsWhiteList] = useState(false)
-  const [presaleTimer, setPresaleTimer] = useState(0)
   const [paused, setPaused] = useState(true)
   const [startTime, setStartTime] = useState(0)
-  const [currentTime, setCurrentTime] = useState(0)
+  const [currentTime, setCurrentTime] = useState((new Date()).getTime())
   const [remainTokenCount, setRemainTokenCount] = useState(-1)
+  const [openedMintModal, setOpenedMintModal] = useState(false)
 
-
-  const [contractBalance, setContractBalance] = useState(0)
-
-  // Breeding
-  const [heroId1, setHeroId1] = useState(0)
-  const [heroId2, setHeroId2] = useState(0)
-
-  const testAddress = '0xA5DBC34d69B745d5ee9494E6960a811613B9ae32'
-
-  // hero
-  const [hero, setHero] = useState<any>(null)
-
-  const connectMetamask = async (e: any) => {
+  const connectMetamask = async () => {
     const connectRes = await connectToWallet()
     console.log(connectRes)
+    const obj = {
+      contract: null as any,
+      web3: null as any,
+      price: 0,
+      isWhiteList: false,
+      paused: true,
+      remainTokenCount: 0,
+      metamaskAccount: ''
+    }
+
     if (connectRes) {
       setWeb3(connectRes.web3)
       setContract(connectRes.contract)
       const account = wnd.ethereum.selectedAddress
       setMetamaskAccount(account)
 
-      connectRes.contract.nativeContract.methods.MINT_PRICE().call().then((res: any) => setPrice(res), (err: any) => console.log(err))
-      api.get(`/whitelist?address=${account}`).then((res: any) => setIsWhiteList(res.data.whitelist), (err: any) => console.log(err))
-      connectRes.contract.nativeContract.methods.bPaused().call().then((res: any) => setPaused(res as boolean), (err: any) => console.log(err))
-      connectRes.contract.nativeContract.methods.startTime().call().then((res: any) => setStartTime(Number(res)), (err: any) => console.log(err))
-      connectRes.contract.nativeContract.methods.getChildren(10101).call().then((res: any) => setHero(res), (err: any) => console.log(err))
-      connectRes.contract.nativeContract.methods.remainTokenCount().call().then((res: any) => setRemainTokenCount(res), (err: any) => console.log(err))
-      // connectRes.contract.nativeContract.methods.getChildrenWithParent(10102, 10101).call().then((res: any) => setHero(res), (err: any) => console.log(err))
-      getEthBalance(contractConfig.contractAddress).then((res: any) => setContractBalance(res), (err: any) => console.log(err))
+      obj.contract = connectRes.contract
+      obj.web3 = connectRes.web3
+      obj.metamaskAccount = account
+
+      let res = await connectRes.contract.nativeContract.methods.MINT_PRICE().call()
+      setPrice(res)
+      obj.price = res
+
+      res = await api.get(`/whitelist?address=${account}`)
+      setIsWhiteList(res.data.whitelist)
+      obj.isWhiteList = res.data.whitelist
+
+      res = await connectRes.contract.nativeContract.methods.bPaused().call()
+      setPaused(res as boolean)
+      obj.paused = res as boolean
+
+      res = await connectRes.contract.nativeContract.methods.remainTokenCount().call()
+      setRemainTokenCount(res)
+      obj.remainTokenCount = res
+
       console.log("Connected ...")
       console.log("Connected Address: ", account)
     }
+    return obj
   }
 
   useEffect(() => {
@@ -76,6 +84,7 @@ const Home = (props: Props) => {
           const {data: profile} = await api.post('/auth/discord/profile', {code})
           setLoggedIn(true)
           setUsername(profile.username)
+          await connectMetamask()
         } catch (error) {
           console.error(error)
         }
@@ -91,6 +100,7 @@ const Home = (props: Props) => {
 
           setLoggedIn(true)
           setUsername(profile.name)
+          await connectMetamask()
           console.log(profile)
         } catch (error) {
           console.error(error)
@@ -100,81 +110,87 @@ const Home = (props: Props) => {
       }
     })()
 
-    connectMetamask(null)
-    const counter = setInterval(onTimer, 1000)
+    api.post('/get-starttime').then((res: any) => {
+      setStartTime(Number(res.data.starttime))
+    }, (err: any) => {})
 
+    const counter = setInterval(onTimer, 1000)
     return () => {
       clearInterval(counter);
-    };
+    }
   }, [])
 
   const onTimer = () => {
     const now = new Date()
     setCurrentTime(now.getTime())
-    if (contract?.nativeContract) {
-      contract.nativeContract.methods.isPresale().call().then((res: any) => setPresaleTimer(res), (err: any) => console.log(err))
-    }
   }
 
-  useEffect(() => {
-    // NotificationManager.success('Success message', 'Title here')
-    if (contract?.nativeContract) {
-      contract.nativeContract.events.MintedNewNFT({}, (error: any, event: any) => {
-        console.log('event: ', error, event)
-        if (error) {
-          return
-        }
-        
-        // const msg = `Token #${event.returnValues.tokenId.padStart(5, "0")} minted`
-        const msg = `Token minted`
-        NotificationManager.info(msg, 'Minted new NFT')
-        contract.nativeContract.methods.remainTokenCount().call().then((res: any) => setRemainTokenCount(res), (err: any) => console.log(err))
-      })
+  const onDiscordLogin = () => {
+    (async () => {
+      try {
+        const CLIENT_ID = process.env.REACT_APP_DISCORD_CLIENT_ID
+        const oauthCallback = process.env.REACT_APP_REDIRECT_AUTH_URL
+        window.location.href = `https://discordapp.com/api/oauth2/authorize?client_id=${CLIENT_ID}&scope=identify&response_type=code&redirect_uri=${oauthCallback}`
+      } catch (error) {
+        console.error(error); 
+      }
+    })()
+  }
 
-      contract.nativeContract.events.BreededNewNFT({}, (error: any, event: any) => {
-        console.log('event: ', error, event)
-        if (error) {
-          return
-        }
+  const onTwitterLogin = () => {
+    (async () => {
+      try {
+        // OAuth Step 1
+        const response = await api.post('/auth/twitter/request_token')
+        const { oauth_token } = response.data;
+        setStorageItem('oauth_token', encrypt(oauth_token))
         
-        const msg = `Token #${event.returnValues.tokenId.padStart(5, "0")} minted`
-        NotificationManager.info(msg, 'Breeded new NFT')
-      })
+        // Oauth Step 2
+        window.location.href = `https://api.twitter.com/oauth/authenticate?oauth_token=${oauth_token}`
+      } catch (error) {
+        console.error(error); 
+      }
+    })();
+  }
 
-      contract.nativeContract.events.PauseEvent({}, (error: any, event: any) => {
-        console.log('event: ', error, event)
-        if (error) {
-          return
-        }
-        
-        const pause = event.returnValues.pause
-        const msg = pause ? "Paused minting" : "Resumed minting"
-        NotificationManager.info(msg, 'Paused new NFT')
-      })
+  const handleMint = async () => {
+    setOpenedMintModal(false)
+    const obj = await connectMetamask()
+    console.log(obj)
+    if (!obj.metamaskAccount) {
+      NotificationManager.warning('You are not connected to wallet', 'Not connected')
+      return
     }
-  }, [contract])
+    if (obj.paused) {
+      NotificationManager.warning('Minting was paused by owner', 'Paused')
+      return
+    }
 
-
-  const handleMint = () => {
-    if (!((remainSeconds() > 0 && isWhiteList) || (remainSeconds() <= 0 && loggedIn)) || !metamaskAccount || paused) {
+    const presaleTimer = remainSeconds()
+    if (presaleTimer > 0 && !obj.isWhiteList) {
+      NotificationManager.warning('You are not added to whitelist', 'Not allowed')
+      return
+    }
+    if (presaleTimer <= 0 && !loggedIn) {
+      NotificationManager.warning('You are not authenticated', 'Not authenticated')
       return
     }
 
     setLoading(true)
-    const apiUrl = presaleTimer ? '/mint' : '/mint-whitelist'
-    api.post(apiUrl, { address: metamaskAccount }).then(res => {
+    const apiUrl = presaleTimer <= 0 ? '/mint' : '/mint-whitelist'
+    api.post(apiUrl, { address: obj.metamaskAccount }).then(res => {
       const { proof, leaf, verified, address } = res.data
       if (!verified) {
         NotificationManager.error('You are not verified', 'Verify Error')
       }
 
       try {
-        contract.mintNFT(metamaskAccount, price, proof, address).then((res1: any) => {
+        obj.contract.mintNFT(obj.metamaskAccount, obj.price, proof, address).then((res1: any) => {
           console.log(res1)
-          // NotificationManager.info('Successfully minted', 'Success')
+          NotificationManager.info('Successfully minted', 'Success')
         }, (err: any) => {
           console.log(err)
-          NotificationManager.error('Failed to mint because of wallet exception', 'Failed')
+          NotificationManager.error('Failed to mint because of contract exception', 'Failed')
         }).finally(() => {
           setLoading(false)
         })
@@ -194,122 +210,6 @@ const Home = (props: Props) => {
     })
   }
 
-  const handleBreed = () => {
-    setLoading(true)
-    try {
-      const tokenUri = ""
-      contract.breedNFT(metamaskAccount, heroId1, heroId2, tokenUri).on('transactionHash', function(hash: any) {
-        setLoading(false)
-      })
-      .on('receipt', function(receipt: any) {
-        console.log("receipt", receipt)
-        setLoading(false)
-      })
-      .on('confirmation', function(confirmationNumber: any, receipt: any) {
-        setLoading(false)
-      })
-      .on('error', (err: any) => {
-        setLoading(false)
-        console.error(err)
-      }); // If a out of gas error, the second parameter is the receipt.
-    } catch (ex) {
-      setLoading(false)
-      console.log(ex)
-    }
-  }
-
-  const handleWithdraw = () => {
-    setLoading(true)
-    try {
-      contract.withdrawEth(metamaskAccount).on('transactionHash', function(hash: any) {
-        setLoading(false)
-      })
-      .on('receipt', function(receipt: any) {
-        console.log("receipt", receipt)
-        setLoading(false)
-      })
-      .on('confirmation', function(confirmationNumber: any, receipt: any) {
-        setLoading(false)
-      })
-      .on('error', (err: any) => {
-        setLoading(false)
-        console.error(err)
-      }); // If a out of gas error, the second parameter is the receipt.
-    } catch (ex) {
-      setLoading(false)
-      console.log(ex)
-    }
-  }
-
-  const handleSetPause = (bAdd: boolean) => {
-    setLoading(true)
-    try {
-      contract.setPause(metamaskAccount, bAdd).on('transactionHash', function(hash: any) {
-        setLoading(false)
-      })
-      .on('receipt', function(receipt: any) {
-        console.log("receipt", receipt)
-        setLoading(false)
-      })
-      .on('confirmation', function(confirmationNumber: any, receipt: any) {
-        setLoading(false)
-      })
-      .on('error', (err: any) => {
-        setLoading(false)
-        console.error(err)
-      }); // If a out of gas error, the second parameter is the receipt.
-    } catch (ex) {
-      setLoading(false)
-      console.log(ex)
-    }
-  }
-
-  const handleStartTime = () => {
-    setLoading(true)
-    try {
-      contract.setStarttime(metamaskAccount).on('transactionHash', function(hash: any) {
-        setLoading(false)
-      })
-      .on('receipt', function(receipt: any) {
-        console.log("receipt", receipt)
-        setLoading(false)
-      })
-      .on('confirmation', function(confirmationNumber: any, receipt: any) {
-        setLoading(false)
-      })
-      .on('error', (err: any) => {
-        setLoading(false)
-        console.error(err)
-      }); // If a out of gas error, the second parameter is the receipt.
-    } catch (ex) {
-      setLoading(false)
-      console.log(ex)
-    }
-  }
-
-  const handleMintUnsold = () => {
-    setLoading(true)
-    try {
-      contract.mintUnsoldTokens(metamaskAccount, []).on('transactionHash', function(hash: any) {
-        setLoading(false)
-      })
-      .on('receipt', function(receipt: any) {
-        console.log("receipt", receipt)
-        setLoading(false)
-      })
-      .on('confirmation', function(confirmationNumber: any, receipt: any) {
-        setLoading(false)
-      })
-      .on('error', (err: any) => {
-        setLoading(false)
-        console.error(err)
-      }); // If a out of gas error, the second parameter is the receipt.
-    } catch (ex) {
-      setLoading(false)
-      console.log(ex)
-    }
-  }
-
   const getTimeString = (tSecs: number) => {
     const h = Math.floor(tSecs / 3600)
     const m = Math.floor((tSecs % 3600) / 60)
@@ -323,40 +223,6 @@ const Home = (props: Props) => {
 
   return (
     <div className='home-page'>
-      <div style={{display: 'none'}}>
-        <div>
-          <button type='button' onClick={handleMint}>Mint</button>
-        </div>
-        <div>
-          <span>heroId1</span>
-          <input type="text" value={heroId1} onChange={(e: any) => setHeroId1(Number(e.target.value))} />
-          <span>heroId2</span>
-          <input type="text" value={heroId2} onChange={(e: any) => setHeroId2(Number(e.target.value))} />
-          <button type='button' onClick={handleBreed}>Breed</button>
-        </div>
-        <div>
-          <button type='button' onClick={handleWithdraw}>Winthdraw</button>
-        </div>
-        <div>Price: {price}</div>
-        <div>contractBalance: {contractBalance}</div>
-        <div>
-          <button type='button' onClick={e => handleSetPause(true)}>setPause</button>
-          <button type='button' onClick={e => handleSetPause(false)}>removePause</button>
-        </div>
-        <div>pause: {String(paused)}</div>
-        <div>
-          <button type='button' onClick={handleStartTime}>setStartTime</button>
-        </div>
-        <div>startTime: {moment(new Date(startTime * 1000)).format("YYYY-MM-DD HH:mm:ss")}</div>
-        <div>IsWhiteList: {String(isWhiteList)}</div>
-        <div>hero: {JSON.stringify(hero)}</div>
-        <div>presaleMode: {JSON.stringify(presaleTimer)}</div>
-        <div>
-          <button type='button' onClick={handleMintUnsold}>mint unsold</button>
-        </div>
-      </div>
-
-      {loading && <Loader />}
       <div className='container'>
         <div className='animation-wrapper'>
           <img src="/assets/images/Apartment.png" alt="img-1" />
@@ -376,18 +242,21 @@ const Home = (props: Props) => {
           )}
           
           <GoogleReCaptchaProvider reCaptchaKey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}>
-            <MintButton
-              disabled={!((remainSeconds() > 0 && isWhiteList) || (remainSeconds() <= 0 && loggedIn)) || !metamaskAccount || paused}
-              presaleMode={remainSeconds() > 0}
-              authenticated={loggedIn}
-              onMint={handleMint}
-            />
+            <MintButton onMint={() => setOpenedMintModal(true)} />
           </GoogleReCaptchaProvider>
         </div>
         <div className='animation-wrapper'>
           <img src="/assets/images/CITY-PNG-1.png" alt="img-2" />
         </div>
       </div>
+      
+      {loading && <Loader />}
+      <AuthSelectorModal
+        isOpen={remainSeconds() < 0 && !loggedIn}
+        onTwitter={onTwitterLogin}
+        onDiscord={onDiscordLogin}
+      />
+      <MintModal isOpen={openedMintModal} onMint={handleMint} onRequestClose={() => setOpenedMintModal(false)}/>
     </div>
   )
 }

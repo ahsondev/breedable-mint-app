@@ -89,32 +89,24 @@ export const connectToWallet = async () => {
   try {
     const web3Modal = new Web3Modal({
       network: 'mainnet', // optional
-      cacheProvider: false,
+      cacheProvider: true,
       providerOptions, // required
       theme: "dark"
     })
     const provider = await web3Modal.connect();
     console.log(provider)
-    // if (wnd.ethereum) {
-      // await wnd.ethereum.request({ method: 'eth_requestAccounts' });
-      // await wnd.ethereum.request({
-      //   method: 'wallet_switchEthereumChain',
-      //   params: [{ chainId: config.networks[config.network].chainId }],
-      //   })
-
-      web3 = new Web3(provider)
-      // web3 = new Web3('wss://eth-kovan.alchemyapi.io/v2/IROGTMfjIr-d3od_IUeYNDzpSVbMHQZY')
-      console.log(BrainDanceNft, contractConfig.contractAddress)
-      contract = new BrainDance()
-      contract.nativeContract = new web3.eth.Contract(
-        BrainDanceNft,
-        contractConfig.contractAddress
-      )
-      return {
-        web3,
-        contract,
-      }
-    // }
+    web3 = new Web3(provider)
+    // web3 = new Web3('wss://eth-kovan.alchemyapi.io/v2/IROGTMfjIr-d3od_IUeYNDzpSVbMHQZY')
+    console.log(BrainDanceNft, contractConfig.contractAddress)
+    contract = new BrainDance()
+    contract.nativeContract = new web3.eth.Contract(
+      BrainDanceNft,
+      contractConfig.contractAddress
+    )
+    return {
+      web3,
+      contract,
+    }
   } catch (switchError) {
     console.log(switchError)
   }

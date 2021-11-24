@@ -69,7 +69,8 @@
     "start": "cross-env NODE_ENV=production node ./server/index.js",
     "build": "craco build",
     "test": "craco test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "pm:start": "pm2 start ./server/index.js"
   },
   "author": "",
   "license": "ISC",

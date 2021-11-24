@@ -2,7 +2,6 @@ import Modal from 'react-modal'
 import { SocialIcon } from 'react-social-icons'
 import ReactTooltip from "react-tooltip"
 import './AuthSelectorModal.scss'
-import imgClose from './images/close-btn.png'
 
 interface PropsType {
   isOpen: boolean
@@ -69,21 +68,12 @@ const AuthSelectorModal = (props: PropsType) => {
           <button
             type='button'
             onClick={handleClickDiscord}
+            className='btn-discord'
             data-for="main"
             data-tip="Authenticate with Discord"
             data-iscapture="true"
           >
             <SocialIcon network="discord" bgColor="#ff5a01" />
-          </button>
-          <button
-            type='button'
-            className='close-button'
-            onClick={handleClose}
-            data-for="main"
-            data-tip="Close modal"
-            data-iscapture="true"
-          >
-            <img className='close-img' src={imgClose} alt="close button" />
           </button>
           <ReactTooltip
             id="main"

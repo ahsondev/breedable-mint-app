@@ -30,5 +30,6 @@ db.Sequelize = Sequelize
 db.connectionSeq = connectionSeq
 
 db.WhiteList = require('./WhiteListModel')(connectionSeq, Sequelize)
+db.Setting = require('./SettingModal')(connectionSeq, Sequelize)
 
 module.exports = db

@@ -1,3 +1,1 @@
-import AuthSelectorModal from "./AuthSelectorModal"
-
-export default AuthSelectorModal
+export { default } from './AuthSelectorModal'

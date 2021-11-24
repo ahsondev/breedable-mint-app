@@ -3,6 +3,7 @@ const { MerkleTree } = require('merkletreejs')
 const keccak256 = require('keccak256')
 const db = require('../models')
 const WhiteList = db.WhiteList
+const Setting = db.Setting
 
 const authCandidates = [
   '0xAB29482938383823838bcdd123',
@@ -82,10 +83,42 @@ async function isWhitelist(req, res) {
   }
 }
 
+async function setStarttime(req, res) {
+  try {
+    const rows = await WhiteList.findAll({ where: { key: 'starttime' }})
+    if (rows.length === 0) {
+      await WhiteList.create({ key: 'starttime', value: req.body.starttime })
+    } else {
+      await Setting.update(
+        { value: req.body.starttime },
+        { where: { key: 'starttime' } }
+      )
+    }
+    res.json({ msg: 'success' })
+  } catch (e) {
+    console.log(e)
+    res.status(500).json({ msg: 'Server Error' })
+  }
+}
+
+async function getStarttime(req, res) {
+  try {
+    const setting = await Setting.findOne({
+      where: { key: 'starttime' }
+    })
+    res.json({ starttime: setting.get({plane: true}).value })
+  } catch (e) {
+    console.log(e)
+    res.status(500).json({ msg: 'Server Error' })
+  }
+}
+
 module.exports = {
   mint,
   mintWhitelist,
   getAuthRoot,
   getWhitelistRoot,
-  isWhitelist
+  isWhitelist,
+  setStarttime,
+  getStarttime
 }

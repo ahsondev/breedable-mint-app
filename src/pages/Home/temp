@@ -1,0 +1,153 @@
+ const handleBreed = () => {
+    setLoading(true)
+    try {
+      const tokenUri = ""
+      contract.breedNFT(metamaskAccount, heroId1, heroId2, tokenUri).on('transactionHash', function(hash: any) {
+        setLoading(false)
+      })
+      .on('receipt', function(receipt: any) {
+        console.log("receipt", receipt)
+        setLoading(false)
+      })
+      .on('confirmation', function(confirmationNumber: any, receipt: any) {
+        setLoading(false)
+      })
+      .on('error', (err: any) => {
+        setLoading(false)
+        console.error(err)
+      }); // If a out of gas error, the second parameter is the receipt.
+    } catch (ex) {
+      setLoading(false)
+      console.log(ex)
+    }
+  }
+
+  const handleWithdraw = () => {
+    setLoading(true)
+    try {
+      contract.withdrawEth(metamaskAccount).on('transactionHash', function(hash: any) {
+        setLoading(false)
+      })
+      .on('receipt', function(receipt: any) {
+        console.log("receipt", receipt)
+        setLoading(false)
+      })
+      .on('confirmation', function(confirmationNumber: any, receipt: any) {
+        setLoading(false)
+      })
+      .on('error', (err: any) => {
+        setLoading(false)
+        console.error(err)
+      }); // If a out of gas error, the second parameter is the receipt.
+    } catch (ex) {
+      setLoading(false)
+      console.log(ex)
+    }
+  }
+
+  const handleSetPause = (bAdd: boolean) => {
+    setLoading(true)
+    try {
+      contract.setPause(metamaskAccount, bAdd).on('transactionHash', function(hash: any) {
+        setLoading(false)
+      })
+      .on('receipt', function(receipt: any) {
+        console.log("receipt", receipt)
+        setLoading(false)
+      })
+      .on('confirmation', function(confirmationNumber: any, receipt: any) {
+        setLoading(false)
+      })
+      .on('error', (err: any) => {
+        setLoading(false)
+        console.error(err)
+      }); // If a out of gas error, the second parameter is the receipt.
+    } catch (ex) {
+      setLoading(false)
+      console.log(ex)
+    }
+  }
+
+  const handleStartTime = () => {
+    setLoading(true)
+    try {
+      contract.setStarttime(metamaskAccount).on('transactionHash', function(hash: any) {
+        setLoading(false)
+      })
+      .on('receipt', function(receipt: any) {
+        console.log("receipt", receipt)
+        setLoading(false)
+      })
+      .on('confirmation', function(confirmationNumber: any, receipt: any) {
+        setLoading(false)
+      })
+      .on('error', (err: any) => {
+        setLoading(false)
+        console.error(err)
+      }); // If a out of gas error, the second parameter is the receipt.
+    } catch (ex) {
+      setLoading(false)
+      console.log(ex)
+    }
+  }
+
+  const handleMintUnsold = () => {
+    setLoading(true)
+    try {
+      contract.mintUnsoldTokens(metamaskAccount, []).on('transactionHash', function(hash: any) {
+        setLoading(false)
+      })
+      .on('receipt', function(receipt: any) {
+        console.log("receipt", receipt)
+        setLoading(false)
+      })
+      .on('confirmation', function(confirmationNumber: any, receipt: any) {
+        setLoading(false)
+      })
+      .on('error', (err: any) => {
+        setLoading(false)
+        console.error(err)
+      }); // If a out of gas error, the second parameter is the receipt.
+    } catch (ex) {
+      setLoading(false)
+      console.log(ex)
+    }
+  }
+
+  useEffect(() => {
+    // NotificationManager.success('Success message', 'Title here')
+    if (contract?.nativeContract) {
+      contract.nativeContract.events.MintedNewNFT({}, (error: any, event: any) => {
+        console.log('event: ', error, event)
+        if (error) {
+          return
+        }
+        
+        // const msg = `Token #${event.returnValues.tokenId.padStart(5, "0")} minted`
+        const msg = `Token minted`
+        NotificationManager.info(msg, 'Minted new NFT')
+        contract.nativeContract.methods.remainTokenCount().call().then((res: any) => setRemainTokenCount(res), (err: any) => console.log(err))
+      })
+
+      contract.nativeContract.events.BreededNewNFT({}, (error: any, event: any) => {
+        console.log('event: ', error, event)
+        if (error) {
+          return
+        }
+        
+        const msg = `Token #${event.returnValues.tokenId.padStart(5, "0")} minted`
+        NotificationManager.info(msg, 'Breeded new NFT')
+      })
+
+      contract.nativeContract.events.PauseEvent({}, (error: any, event: any) => {
+        console.log('event: ', error, event)
+        if (error) {
+          return
+        }
+        
+        const pause = event.returnValues.pause
+        const msg = pause ? "Paused minting" : "Resumed minting"
+        NotificationManager.info(msg, 'Paused new NFT')
+      })
+    }
+  }, [contract])
