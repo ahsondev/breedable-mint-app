@@ -10,7 +10,7 @@ function App() {
           {routes.map((e) => (
             <Route key={e.path} path={e.path} exact component={e.component} />
           ))}
-          <Redirect to='/home' />
+          <Redirect to='/' />
         </Switch>
       </Router>
       <NotificationContainer/>

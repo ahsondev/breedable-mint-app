@@ -13,6 +13,8 @@ async function getOAuthToken(req, res, next) {
     tokens[oauth_token] = { oauth_token_secret }
     res.json({ oauth_token })
   } catch (e) {
+    console.log(e)
+    res.status(500).json({ message: 'Twitter OAuthToken Error' })
   }
 }
 
@@ -48,7 +50,8 @@ async function getProfile(req, res, next) {
     );
     res.json(JSON.parse(response.data));
   } catch (error) {
-    res.status(403).json({ message: 'Missing access token' })
+    console.log(error)
+    res.status(500).json({ message: 'Missing access token' })
   }
 }
 
@@ -59,7 +62,8 @@ async function logout(req, res, next) {
     res.cookie(COOKIE_NAME, {}, {maxAge: -1});
     res.json({success: true});
   } catch(error) {
-    res.status(403).json({message: "Missing, invalid, or expired tokens"});
+    console.log(error)
+    res.status(500).json({message: "Missing, invalid, or expired tokens"});
   }
 }
 

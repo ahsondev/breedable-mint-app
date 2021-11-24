@@ -3,34 +3,34 @@ import BrainDanceNft from 'contracts/BrainDanceNft.json'
 import { createAlchemyWeb3 } from '@alch/alchemy-web3'
 import Web3 from 'web3'
 import config from './config'
+import Web3Modal from "web3modal"
+import WalletConnectProvider from '@walletconnect/web3-provider'
 
 const wnd = window as any
+
+const INFURA_ID = '8043bb2cf99347b1bfadfb233c5325c0'
+const providerOptions = {
+  walletconnect: {
+    package: WalletConnectProvider, // required
+    options: {
+      infuraId: INFURA_ID, // required
+    },
+  }
+}
 
 let web3: any
 
 export class BrainDance {
   nativeContract: any = null
 
-  mintNFT(addr: string, mintPricePerToken: number) {
-    // const priceWei = web3.utils.toWei(mintPricePerToken.toString(), 'ether') // Convert to wei value
-    // console.log('mintPricePerToken: ', mintPricePerToken, priceWei)
-    // this.nativeContract.methods.requestRandomNFT(addr, amount).send({
-    //   from: addr,
-    //   value: priceWei,
-    // }).then((res: any) => {
-    //   resolve(res)
-    // }, (err: any) => {
-    //   reject(err)
-    // })
-
-    // real gas = gas * maxPriorityFeePerGas / 10^18
+  mintNFT(addr: string, mintPricePerToken: number, proof: any, leaf: string) {
     const tx = {
       from: addr,
       to: contractConfig.contractAddress,
       // gas: 50000, // 500 000 gas
       value: mintPricePerToken,
       // maxPriorityFeePerGas: 1999999987, // 199...987 wei
-      data: this.nativeContract.methods.mint().encodeABI(),
+      data: this.nativeContract.methods.mint(proof, leaf).encodeABI(),
     }
 
     return web3.eth.sendTransaction(tx)
@@ -64,24 +64,6 @@ export class BrainDance {
     return web3.eth.sendTransaction(tx)
   }
 
-  addWhiteList(address: string, _addresses: string[]) {
-    const tx = {
-      from: address,
-      to: contractConfig.contractAddress,
-      data: this.nativeContract.methods.addWhiteLists(_addresses).encodeABI(),
-    }
-    return web3.eth.sendTransaction(tx)
-  }
-
-  removeWhiteList(address: string, _addresses: string[]) {
-    const tx = {
-      from: address,
-      to: contractConfig.contractAddress,
-      data: this.nativeContract.methods.removeWhiteLists(_addresses).encodeABI(),
-    }
-    return web3.eth.sendTransaction(tx)
-  }
-
   setStarttime(address: string) {
     const tx = {
       from: address,
@@ -105,14 +87,22 @@ let contract: BrainDance
 
 export const connectToWallet = async () => {
   try {
-    if (wnd.ethereum) {
-      await wnd.ethereum.request({ method: 'eth_requestAccounts' });
-      await wnd.ethereum.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: config.networks[config.network].chainId }],
-        })
+    const web3Modal = new Web3Modal({
+      network: 'mainnet', // optional
+      cacheProvider: false,
+      providerOptions, // required
+      theme: "dark"
+    })
+    const provider = await web3Modal.connect();
+    console.log(provider)
+    // if (wnd.ethereum) {
+      // await wnd.ethereum.request({ method: 'eth_requestAccounts' });
+      // await wnd.ethereum.request({
+      //   method: 'wallet_switchEthereumChain',
+      //   params: [{ chainId: config.networks[config.network].chainId }],
+      //   })
 
-      web3 = createAlchemyWeb3(config.networks[config.network].alchemyWssUrl)
+      web3 = new Web3(provider)
       // web3 = new Web3('wss://eth-kovan.alchemyapi.io/v2/IROGTMfjIr-d3od_IUeYNDzpSVbMHQZY')
       console.log(BrainDanceNft, contractConfig.contractAddress)
       contract = new BrainDance()
@@ -124,7 +114,7 @@ export const connectToWallet = async () => {
         web3,
         contract,
       }
-    }
+    // }
   } catch (switchError) {
     console.log(switchError)
   }

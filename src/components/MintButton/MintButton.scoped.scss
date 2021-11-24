@@ -1,16 +1,25 @@
 .mint {
+  background: linear-gradient(45deg, #E200FF, #8700FF);
   border: none;
   outline: none;
   background-color: #000;
   border-radius: 12px;
   color: #fff;
-  padding: 12px 20px;
   font-size: 20px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   transition: all 0.3s;
+  width: 200px;
+  height: 40px;
+  border-radius: 100px;
+  transition: all 0.7s;
 
   &:hover:not(:active) {
-    background-color: #333;
-    box-shadow: 0px 0px 10px 1px #0006;
+    background: linear-gradient(45deg, #ae00ff, #8700FF);
+    box-shadow: 0px 0px 30px 1px #ae00ff;
+  }
+
+  &:disabled {
+    background: linear-gradient(45deg, #535353, #747474) !important;
+    box-shadow: none !important;
   }
 }

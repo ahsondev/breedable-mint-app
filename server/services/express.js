@@ -9,7 +9,9 @@ const resolvePath = require('path').resolve
 module.exports = function expressApp(routes) {
   const app = express()
 
-  app.use(cors())
+  if (process.env.NODE_ENV === 'development') {
+    app.use(cors())
+  }
   app.use(compression())
   app.use(bodyParser.urlencoded({ extended: false }))
   app.use(bodyParser.json())

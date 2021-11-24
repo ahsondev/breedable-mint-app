@@ -221,19 +221,6 @@
   {
     "inputs": [
       {
-        "internalType": "address[]",
-        "name": "addrs",
-        "type": "address[]"
-      }
-    ],
-    "name": "addWhiteLists",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "address",
         "name": "to",
         "type": "address"
@@ -555,14 +542,8 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "addr",
-        "type": "address"
-      }
-    ],
-    "name": "isWhiteList",
+    "inputs": [],
+    "name": "isPresale",
     "outputs": [
       {
         "internalType": "bool",
@@ -574,7 +555,18 @@
     "type": "function"
   },
   {
-    "inputs": [],
+    "inputs": [
+      {
+        "internalType": "bytes32[]",
+        "name": "proof",
+        "type": "bytes32[]"
+      },
+      {
+        "internalType": "string",
+        "name": "leaf",
+        "type": "string"
+      }
+    ],
     "name": "mint",
     "outputs": [],
     "stateMutability": "payable",
@@ -693,19 +685,6 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address[]",
-        "name": "addrs",
-        "type": "address[]"
-      }
-    ],
-    "name": "removeWhiteLists",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "inputs": [],
     "name": "renounceOwnership",
     "outputs": [],
@@ -790,6 +769,32 @@
       }
     ],
     "name": "setPause",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "root_",
+        "type": "bytes32"
+      }
+    ],
+    "name": "setRootAuth",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "root_",
+        "type": "bytes32"
+      }
+    ],
+    "name": "setRootWhitelist",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -989,25 +994,6 @@
         "internalType": "uint256[]",
         "name": "",
         "type": "uint256[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "whiteList",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
       }
     ],
     "stateMutability": "view",

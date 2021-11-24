@@ -25,7 +25,7 @@ async function getProfile(req, res, next) {
 
 
   if (tokenAccessCounts[code]) {
-    res.status(403).json({message: 'Duplicated code'})
+    res.status(500).json({message: 'Duplicated code'})
     return
   }
 
@@ -67,7 +67,7 @@ async function getProfile(req, res, next) {
     res.json(response1.data)
   } catch (error) {
     // console.error(error)
-    res.status(403).json(error)
+    res.status(500).json(error)
   }
 };
 
