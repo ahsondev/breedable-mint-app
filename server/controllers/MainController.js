@@ -85,9 +85,9 @@ async function isWhitelist(req, res) {
 
 async function setStarttime(req, res) {
   try {
-    const rows = await WhiteList.findAll({ where: { key: 'starttime' }})
+    const rows = await Setting.findAll({ where: { key: 'starttime' }})
     if (rows.length === 0) {
-      await WhiteList.create({ key: 'starttime', value: req.body.starttime })
+      await Setting.create({ key: 'starttime', value: req.body.starttime })
     } else {
       await Setting.update(
         { value: req.body.starttime },
