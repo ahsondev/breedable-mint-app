@@ -3,8 +3,8 @@ const routes = require('./routes')
 const db = require('./models')
 
 const port = 4000
-// const host = '127.0.0.1'
-const host = '192.168.112.79'
+const host = '127.0.0.1'
+// const host = '192.168.112.79'
 const app = express(routes)
 
 db.connectionSeq.sync()
