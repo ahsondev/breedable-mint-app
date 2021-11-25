@@ -203,7 +203,7 @@ const Admin = (props: Props) => {
 
   return (
     <div className='home-page'>
-      {contractConfig.deployer === metamaskAccount && (
+      {contractConfig.deployer.toLocaleLowerCase() === metamaskAccount.toLocaleLowerCase() && (
         <>
           <div>
             <button type='button' onClick={handleStartTime}>Set StartTime</button>
