@@ -114,6 +114,8 @@ const Home = (props: Props) => {
       setStartTime(Number(res.data.starttime))
     }, (err: any) => {})
 
+    // connectMetamask()
+
     const counter = setInterval(onTimer, 1000)
     return () => {
       clearInterval(counter);
@@ -251,11 +253,11 @@ const Home = (props: Props) => {
       </div>
       
       {loading && <Loader />}
-      <AuthSelectorModal
+      {/* <AuthSelectorModal
         isOpen={remainSeconds() < 0 && !loggedIn}
         onTwitter={onTwitterLogin}
         onDiscord={onDiscordLogin}
-      />
+      /> */}
       <MintModal isOpen={openedMintModal} onMint={handleMint} onRequestClose={() => setOpenedMintModal(false)}/>
     </div>
   )

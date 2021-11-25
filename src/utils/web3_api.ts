@@ -5,6 +5,7 @@ import Web3 from 'web3'
 import config from './config'
 import Web3Modal from "web3modal"
 import WalletConnectProvider from '@walletconnect/web3-provider'
+import Onboard from 'bnc-onboard'
 
 const wnd = window as any
 
@@ -20,6 +21,21 @@ const providerOptions = {
     }
   }
 }
+
+const onboard = Onboard({
+  dappId: 'e31c177f-44ee-4dec-b21b-f6cdf362f531',       // [String] The API key created by step one above
+  networkId: 4,  // [Integer] The Ethereum network ID your Dapp uses.
+  subscriptions: {
+    wallet: (wallet: any) => {
+       web3 = new Web3(wallet.provider)
+    }
+  },
+  walletSelect: {
+    wallets: [
+      { walletName: "metamask", preferred: true }
+    ] 
+  }
+});
 
 let web3: any
 
@@ -90,15 +106,17 @@ let contract: BrainDance
 
 export const connectToWallet = async () => {
   try {
-    const web3Modal = new Web3Modal({
-      network: 'mainnet', // optional
-      cacheProvider: true,
-      providerOptions, // required
-      theme: "dark"
-    })
-    const provider = await web3Modal.connect();
-    console.log(provider)
-    web3 = new Web3(provider)
+    // const web3Modal = new Web3Modal({
+    //   network: 'mainnet', // optional
+    //   cacheProvider: true,
+    //   providerOptions, // required
+    //   theme: "dark"
+    // })
+    // const provider = await web3Modal.connect();
+    // console.log(provider)
+    // web3 = new Web3(provider)
+    await onboard.walletSelect();
+    await onboard.walletCheck();
     // web3 = new Web3('wss://eth-kovan.alchemyapi.io/v2/IROGTMfjIr-d3od_IUeYNDzpSVbMHQZY')
     console.log(BrainDanceNft, contractConfig.contractAddress)
     contract = new BrainDance()
