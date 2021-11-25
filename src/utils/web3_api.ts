@@ -13,8 +13,11 @@ const providerOptions = {
   walletconnect: {
     package: WalletConnectProvider, // required
     options: {
-      infuraId: INFURA_ID, // required
-    },
+      rpc: {
+        4: 'https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161'
+      },
+      chainId: 4
+    }
   }
 }
 

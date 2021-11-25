@@ -70,7 +70,7 @@
     "build": "craco build",
     "test": "craco test",
     "eject": "react-scripts eject",
-    "pm:start": "pm2 start ./server/index.js"
+    "pm2:start": "pm2 start ./server/index.js"
   },
   "author": "",
   "license": "ISC",
