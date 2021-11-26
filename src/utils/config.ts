@@ -3,7 +3,7 @@ let env = {}
 if (process.env.NODE_ENV === 'development') {
   env = {
     network: 'rinkeby',
-    apiUrl: 'http://192.168.112.79:4000/api'
+    apiUrl: 'http://127.0.0.1:4000/api'
   }
 } else {
   env = {

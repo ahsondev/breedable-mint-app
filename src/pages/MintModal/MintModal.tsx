@@ -32,8 +32,8 @@ const MintModal = (props: PropsType) => {
         content: {
           position: 'absolute',
           top: 'calc(50% - 100px)',
-          left: 'calc(50% - 200px)',
-          width: '400px',
+          left: 'calc(50% - 150px)',
+          width: '300px',
           height: '200px',
           border: 'none',
           background: 'var(--background-color)',

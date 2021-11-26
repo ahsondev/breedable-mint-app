@@ -226,8 +226,23 @@ const Home = (props: Props) => {
   return (
     <div className='home-page'>
       <div className='container'>
-        <div className='animation-wrapper'>
-          <img src="/assets/images/Apartment.png" alt="img-1" />
+        <div className='characters'>
+          <div className='animation-wrapper'>
+            <iframe src="BoyLifeTank.34/index.html"
+              allowFullScreen={true}
+              frameBorder="0"
+              scrolling="no"
+              title="BodyLife"
+            />
+          </div>
+          <div className='animation-wrapper'>
+            <iframe src="GirlLifeTank.34/index.html"
+              allowFullScreen={true}
+              frameBorder="0"
+              scrolling="no"
+              title="GirlLife"
+            />
+          </div>
         </div>
         <div className='button-wrapper'>
           {remainSeconds() > 0 && startTime > 0 && (
@@ -246,9 +261,6 @@ const Home = (props: Props) => {
           <GoogleReCaptchaProvider reCaptchaKey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}>
             <MintButton onMint={() => setOpenedMintModal(true)} />
           </GoogleReCaptchaProvider>
-        </div>
-        <div className='animation-wrapper'>
-          <img src="/assets/images/CITY-PNG-1.png" alt="img-2" />
         </div>
       </div>
       
