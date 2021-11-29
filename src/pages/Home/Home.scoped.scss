@@ -82,12 +82,11 @@
   .home-page {
     .container {
       .characters {
+        padding: 0px;
         flex-direction: column;
         .animation-wrapper {
           margin: 0 0 40px 0;
           width: 100%;
-          border: 2px solid rgba(192, 34, 171, 0.7);
-          box-shadow: 0 0 10px 1px rgba(255, 46, 227, 0.7);
           &:last-child {
             margin-bottom: 0;
           }
