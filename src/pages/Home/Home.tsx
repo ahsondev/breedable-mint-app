@@ -228,7 +228,7 @@ const Home = (props: Props) => {
       <div className='container'>
         <div className='characters'>
           <div className='animation-wrapper'>
-            <iframe src="BoyLifeTank.34/index.html"
+            <iframe src="/Boy LifeTank.33/Boy Life Tank.33.html"
               allowFullScreen={true}
               frameBorder="0"
               scrolling="no"
@@ -236,7 +236,7 @@ const Home = (props: Props) => {
             />
           </div>
           <div className='animation-wrapper'>
-            <iframe src="GirlLifeTank.34/index.html"
+            <iframe src="Girl Life Tank.34/Boy Life Tank.34.html"
               allowFullScreen={true}
               frameBorder="0"
               scrolling="no"
