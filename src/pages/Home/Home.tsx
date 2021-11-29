@@ -173,10 +173,10 @@ const Home = (props: Props) => {
       NotificationManager.warning('You are not added to whitelist', 'Not allowed')
       return
     }
-    if (presaleTimer <= 0 && !loggedIn) {
-      NotificationManager.warning('You are not authenticated', 'Not authenticated')
-      return
-    }
+    // if (presaleTimer <= 0 && !loggedIn) {
+    //   NotificationManager.warning('You are not authenticated', 'Not authenticated')
+    //   return
+    // }
 
     setLoading(true)
     const apiUrl = presaleTimer <= 0 ? '/mint' : '/mint-whitelist'
