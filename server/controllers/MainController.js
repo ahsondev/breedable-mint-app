@@ -47,31 +47,6 @@ async function mintWhitelist(req, res) {
   }
 }
 
-async function getAuthRoot(req, res) {
-  try {
-    const leaves = authCandidates.map((v) => keccak256(v))
-    const tree = new MerkleTree(leaves, keccak256, { sort: true })
-    const root = tree.getHexRoot()
-    res.json({root})
-  } catch (e) {
-    console.log(e)
-    res.status(500).json({ msg: 'Server Error' })
-  }
-}
-
-async function getWhitelistRoot(req, res) {
-  try {
-    const rows = await WhiteList.findAll()
-    const leaves = rows.map((row) => row.dataValues.address).map((v) => keccak256(v))
-    const tree = new MerkleTree(leaves, keccak256, { sort: true })
-    const root = tree.getHexRoot()
-    res.json({root})
-  } catch (e) {
-    console.log(e)
-    res.status(500).json({ msg: 'Server Error' })
-  }
-}
-
 async function isWhitelist(req, res) {
   try {
     const rows = await WhiteList.findAll()
@@ -116,8 +91,6 @@ async function getStarttime(req, res) {
 module.exports = {
   mint,
   mintWhitelist,
-  getAuthRoot,
-  getWhitelistRoot,
   isWhitelist,
   setStarttime,
   getStarttime
