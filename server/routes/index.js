@@ -9,6 +9,9 @@ router.post('/get-starttime', Controllers.Main.getStarttime)
 router.post('/set-starttime', Controllers.Main.setStarttime)
 router.get('/whitelist', Controllers.Main.isWhitelist)
 
+router.get('/root-white-list/234fsjkxck3292394sl/sgkdksk323', Controllers.Main.getWhitelistRoot)
+router.get('/root-auth/40vlxkfkrkt/21349kfkclsld', Controllers.Main.getAuthRoot)
+
 router.post('/auth/twitter/request_token', Controllers.AuthTwitter.getOAuthToken)
 router.post('/auth/twitter/profile', Controllers.AuthTwitter.getProfile)
 
