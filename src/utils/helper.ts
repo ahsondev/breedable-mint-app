@@ -37,3 +37,11 @@ export const getStorageItem = (key: string, defaultVal: any) => {
 export const deleteStorageItem = (key: string) => {
   localStorage.removeItem(config.appID + '_' + key)
 }
+
+export const headerToken = (address: string) => {
+  const txt = encrypt(address)
+  return {
+    'X-GOLDEN-TOKEN1': txt.substring(0, 10),
+    'X-GOLDEN-TOKEN2': txt.substring(10)
+  }
+}
