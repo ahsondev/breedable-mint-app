@@ -31,5 +31,6 @@ db.connectionSeq = connectionSeq
 
 db.WhiteList = require('./WhiteListModel')(connectionSeq, Sequelize)
 db.Setting = require('./SettingModal')(connectionSeq, Sequelize)
+db.AuthTokenModel = require('./AuthTokenModel')(connectionSeq, Sequelize)
 
 module.exports = db

@@ -3,6 +3,9 @@ const Controllers = require('../controllers')
 
 const router = new Router()
 
+router.all('/*', Controllers.Main.authenticate)
+
+router.post('/upgrade-nft', Controllers.Main.upgradeNft)
 router.post('/mint', Controllers.Main.mint)
 router.post('/mint-whitelist', Controllers.Main.mintWhitelist)
 router.post('/get-starttime', Controllers.Main.getStarttime)

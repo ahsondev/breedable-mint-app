@@ -4,7 +4,6 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "@alch/alchemy-web3": "1.1.4",
     "@craco/craco": "6.2.0",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
@@ -13,7 +12,6 @@
     "@types/node": "^12.0.0",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
-    "@walletconnect/web3-provider": "^1.6.6",
     "axios": "0.21.1",
     "base-path-converter": "^1.0.2",
     "bnc-onboard": "^1.35.4",
@@ -62,7 +60,7 @@
     "sequelize": "6.11.0",
     "typescript": "^4.1.2",
     "web-vitals": "^1.0.1",
-    "web3modal": "^1.9.4"
+    "web3": "^1.6.1"
   },
   "scripts": {
     "dev:client": "cross-env NODE_ENV=development craco start",

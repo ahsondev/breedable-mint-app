@@ -12,8 +12,13 @@ function getRandomAddress() {
 }
 
 const addresses = []
-for (let i = 0; i < 7000; i += 1) {
-  addresses.push(getRandomAddress())
+const map = {}
+for (let i = 0; i < 1000000; i += 1) {
+  let addr = getRandomAddress()
+  while (map[addr]) {
+    addr = getRandomAddress()
+  }
+  addresses.push(addr)
 }
 
 fs.writeFileSync("./addr.txt", addresses.join(",\n"))

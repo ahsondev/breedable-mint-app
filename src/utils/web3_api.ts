@@ -1,26 +1,9 @@
 import contractConfig from 'contracts/config.json'
 import BrainDanceNft from 'contracts/BrainDanceNft.json'
-import { createAlchemyWeb3 } from '@alch/alchemy-web3'
 import Web3 from 'web3'
-import config from './config'
-import Web3Modal from "web3modal"
-import WalletConnectProvider from '@walletconnect/web3-provider'
 import Onboard from 'bnc-onboard'
 
-const wnd = window as any
-
-const INFURA_ID = '8043bb2cf99347b1bfadfb233c5325c0'
-const providerOptions = {
-  walletconnect: {
-    package: WalletConnectProvider, // required
-    options: {
-      rpc: {
-        4: 'https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161'
-      },
-      chainId: 4
-    }
-  }
-}
+let web3: any
 
 const onboard = Onboard({
   dappId: 'e31c177f-44ee-4dec-b21b-f6cdf362f531',       // [String] The API key created by step one above
@@ -37,7 +20,6 @@ const onboard = Onboard({
   }
 });
 
-let web3: any
 
 export class BrainDance {
   nativeContract: any = null

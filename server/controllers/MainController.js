@@ -4,6 +4,7 @@ const keccak256 = require('keccak256')
 const db = require('../models')
 const WhiteList = db.WhiteList
 const Setting = db.Setting
+const {encrypt} = require('../services/helper')
 
 const authCandidates = [
   '0xAB29482938383823838bcdd123',
@@ -19,6 +20,17 @@ function getMerkleData(address, arr) {
   const proof = tree.getHexProof(leaf)
   const verified = tree.verify(proof, leaf, root)
   return { proof, leaf, verified, address }
+}
+
+async function authenticate(req, res, next) {
+  const addressToken = (req.header('X-GOLDEN-TOKEN1') || "") + (req.header('X-GOLDEN-TOKEN2') || "")
+  const address = req.body.address || req.query.address || req.param.address
+  if (addressToken === encrypt(address)) {
+    next()
+    return
+  }
+
+  res.status(401).json({'msg': 'Authentication Error'})
 }
 
 async function mint(req, res) {
@@ -88,10 +100,24 @@ async function getStarttime(req, res) {
   }
 }
 
+async function upgradeNft(req, res) {
+  try {
+    const setting = await Setting.findOne({
+      where: { key: 'starttime' }
+    })
+    res.json({ starttime: setting.get({plane: true}).value })
+  } catch (e) {
+    console.log(e)
+    res.status(500).json({ msg: 'Server Error' })
+  }
+}
+
 module.exports = {
+  authenticate,
   mint,
   mintWhitelist,
   isWhitelist,
   setStarttime,
-  getStarttime
+  getStarttime,
+  upgradeNft
 }

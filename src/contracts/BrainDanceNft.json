@@ -606,6 +606,11 @@
         "internalType": "string[]",
         "name": "tokenUris_",
         "type": "string[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "count_",
+        "type": "uint256"
       }
     ],
     "name": "mintUnsoldTokens",

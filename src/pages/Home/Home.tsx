@@ -2,13 +2,10 @@ import { useEffect, useState } from 'react'
 import { BrainDance, connectToWallet } from 'utils/web3_api'
 import { NotificationManager } from 'components/Notification'
 import Loader from 'components/Loader'
-import queryString from 'query-string'
-import { encrypt, getStorageItem, setStorageItem } from 'utils/helper'
 import api from 'utils/api'
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import MintButton from 'components/MintButton'
 import './Home.scoped.scss'
-import AuthSelectorModal from 'pages/AuthSelectorModal'
 import MintModal from 'pages/MintModal'
 
 const wnd = window as any
@@ -16,8 +13,6 @@ const wnd = window as any
 interface Props {}
 
 const Home = (props: Props) => {
-  const [loggedIn, setLoggedIn] = useState(false)
-  const [username, setUsername] = useState('')
   const [metamaskAccount, setMetamaskAccount] = useState('')
   const [price, setPrice] = useState(0)
   const [loading, setLoading] = useState(false)
@@ -127,34 +122,6 @@ const Home = (props: Props) => {
     setCurrentTime(now.getTime())
   }
 
-  const onDiscordLogin = () => {
-    (async () => {
-      try {
-        const CLIENT_ID = process.env.REACT_APP_DISCORD_CLIENT_ID
-        const oauthCallback = process.env.REACT_APP_REDIRECT_AUTH_URL
-        window.location.href = `https://discordapp.com/api/oauth2/authorize?client_id=${CLIENT_ID}&scope=identify&response_type=code&redirect_uri=${oauthCallback}`
-      } catch (error) {
-        console.error(error); 
-      }
-    })()
-  }
-
-  const onTwitterLogin = () => {
-    (async () => {
-      try {
-        // OAuth Step 1
-        const response = await api.post('/auth/twitter/request_token')
-        const { oauth_token } = response.data;
-        setStorageItem('oauth_token', encrypt(oauth_token))
-        
-        // Oauth Step 2
-        window.location.href = `https://api.twitter.com/oauth/authenticate?oauth_token=${oauth_token}`
-      } catch (error) {
-        console.error(error); 
-      }
-    })();
-  }
-
   const handleMint = async () => {
     setOpenedMintModal(false)
     const obj = await connectMetamask()
@@ -181,7 +148,7 @@ const Home = (props: Props) => {
     setLoading(true)
     const apiUrl = presaleTimer <= 0 ? '/mint' : '/mint-whitelist'
     api.post(apiUrl, { address: obj.metamaskAccount }).then(res => {
-      const { proof, leaf, verified, address } = res.data
+      const { proof, verified, address } = res.data
       if (!verified) {
         NotificationManager.error('You are not verified', 'Verify Error')
       }
