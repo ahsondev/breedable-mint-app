@@ -1,8 +1,8 @@
 import { createStore, applyMiddleware, combineReducers } from 'redux'
 import thunkMiddleware from 'redux-thunk'
 
-import sample from 'reducers/sample'
+import contract from 'reducers/contract'
 
-const store = createStore(combineReducers({sample}), applyMiddleware(thunkMiddleware))
+const store = createStore(combineReducers({contract}), applyMiddleware(thunkMiddleware))
 
 export default store

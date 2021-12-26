@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { BrainDance, connectToWallet } from 'utils/web3_api'
 import { NotificationManager } from 'components/Notification'
 import Loader from 'components/Loader'
@@ -8,6 +8,8 @@ import MintButton from 'components/MintButton'
 import './Home.scoped.scss'
 import MintModal from 'pages/MintModal'
 import { headerToken, decrypt } from 'utils/helper'
+import {connectToMetamask, getAccountStatus, getContractStatus} from 'actions/contract'
+import { useDispatch, useSelector } from 'react-redux'
 
 const wnd = window as any
 
@@ -15,94 +17,91 @@ interface Props {}
 
 const Home = (props: Props) => {
   const [loading, setLoading] = useState(false)
-  const [contract, setContract] = useState<any>(null)
-  const [paused, setPaused] = useState(true)
   const [startTime, setStartTime] = useState(0)
   const [currentTime, setCurrentTime] = useState((new Date()).getTime())
-  const [remainTokenCount, setRemainTokenCount] = useState(-1)
   const [openedMintModal, setOpenedMintModal] = useState(false)
 
-  const connectMetamask = async () => {
-    const connectRes = await connectToWallet()
-    console.log(connectRes)
-    const obj = {
-      contract: null as any,
-      web3: null as any,
-      price: 0,
-      paused: true,
-      remainTokenCount: 0,
-      metamaskAccount: ''
-    }
+  const web3 = useSelector((state: any) => state.contract.web3)
+  const contract = useSelector((state: any) => state.contract.contract)
+  const price = useSelector((state: any) => state.contract.price)
+  const statusFlag = useSelector((state: any) => state.contract.statusFlag)
+  const presaleReservedTokenCount = useSelector((state: any) => state.contract.presaleReservedTokenCount)
+  const presaleReservedAddressCount = useSelector((state: any) => state.contract.presaleReservedAddressCount)
+  const presaleTokenCount = useSelector((state: any) => state.contract.presaleTokenCount)
+  const presaleAddressLimit = useSelector((state: any) => state.contract.presaleAddressLimit)
+  const ticketCount = useSelector((state: any) => state.contract.ticketCount)
+  const dispatch = useDispatch() as any
 
-    if (connectRes) {
-      setContract(connectRes.contract)
-      obj.contract = connectRes.contract
-      obj.web3 = connectRes.web3
-      obj.price = await connectRes.contract.methods.mintPrice().call()
-      obj.metamaskAccount = wnd.ethereum.selectedAddress
-      obj.paused = await connectRes.contract.methods.bPaused().call()
-      obj.remainTokenCount = await connectRes.contract.methods.remainTokenCount().call()
-      setPaused(obj.paused)
-      setRemainTokenCount(obj.remainTokenCount)
-    }
+  const onTimer = useCallback(async () => {
+    dispatch(getContractStatus(contract))
+    dispatch(getAccountStatus(contract, wnd.ethereum.selectedAddress))
+  }, [contract])
 
-    return obj
-  }
-
-  useEffect(() => {
-    api.post('/get-starttime').then((res: any) => {
-      setStartTime(Number(res.data.starttime))
-    }, (err: any) => {})
-
-    // connectMetamask()
-
-    const counter1 = setInterval(onTimer1, 1000)
-    const counter2 = setInterval(onTimer2, 5000)
-    return () => {
-      clearInterval(counter1);
-      clearInterval(counter2);
-    }
-  }, [])
-
-  const onTimer1 = () => {
+  const onTimerSecond = useCallback(() => {
     const now = new Date()
     setCurrentTime(now.getTime())
-  }
-  
-  const onTimer2 = async () => {
-    if (contract) {
-      const paused = await contract.methods.bPaused().call()
-      setPaused(paused)
-    }
-  }
+  }, [])
 
+  useEffect(() => {
+    dispatch(connectToMetamask()).then((res: any) => {
+      dispatch(getContractStatus(res.contract))
+      dispatch(getAccountStatus(res.contract, wnd.ethereum.selectedAddress))
+      api.get('/get-starttime').then((res: any) => {
+        setStartTime(Number(res.data.starttime))
+      }, (err: any) => {})
+    }, (err: any) => {})
+  }, [])
+
+  useEffect(() => {
+    const counter = setInterval(onTimer, 4000)
+    return (() => {
+      clearInterval(counter)
+    })
+  }, [onTimer])
+
+  useEffect(() => {
+    const counter = setInterval(onTimerSecond, 1000)
+    return (() => {
+      clearInterval(counter)
+    })
+  }, [onTimerSecond])
+
+  useEffect(() => {
+  }, [])
+  
   const handleMint = async () => {
     setOpenedMintModal(false)
-    const obj = await connectMetamask()
-    console.log(obj)
-    if (!obj.metamaskAccount) {
+
+    const account = wnd.ethereum.selectedAddress
+
+    if (!account) {
       NotificationManager.warning('You are not connected to wallet', 'Not connected')
       return
     }
 
-    if (obj.paused) {
-      NotificationManager.warning('Minting was paused by owner', 'Paused')
+    if (Number(window.ethereum.networkVersion) !== 4) {
+      NotificationManager.warning('Please connect to the mainnet', 'Network error')
+      return
+    }
+
+    if (statusFlag < 2) {
+      NotificationManager.warning('Mint sale is not started', 'Not started')
+      return
+    }
+
+    if (statusFlag === 4) {
+      NotificationManager.warning('Mint sale has ended', 'Mint sale ended')
       return
     }
 
     setLoading(true)
     try {
-      const {data} = await api.post('/mint',
-        { address: obj.metamaskAccount },
-        { headers: headerToken(obj.metamaskAccount) })
-
-        const sign = Number(decrypt(data.token))
-        const contract = new BrainDance(obj.contract)
-        await contract.mint(obj.metamaskAccount, obj.price, sign)
-        NotificationManager.info('Successfully minted', 'Success')
+      const contractBD = new BrainDance(contract)
+      await contractBD.mint(account, price)
+      NotificationManager.info('Successfully minted', 'Success')
     } catch (e) {
       console.log(e)
-      NotificationManager.error('Please check if you are online', 'Server Error')
+      NotificationManager.error('Mint operation was not done successfully', 'Error')
     }
     setLoading(false)
   }
@@ -140,25 +139,40 @@ const Home = (props: Props) => {
           </div>
         </div>
         <div className='button-wrapper'>
-          {remainSeconds() > 0 && startTime > 0 && (
-            <div className="presale-container">
-              <div className='title'>Presale</div>
-              <div className='timer'>{getTimeString(remainSeconds())}</div>
-            </div>
+          <div className='title'>
+            {statusFlag < 2 && <>Not started</>}
+            {statusFlag === 2 && <>Presale</>}
+            {statusFlag === 3 && <>Public sale</>}
+            {statusFlag === 4 && <>Mint ended</>}
+            {statusFlag === 5 && <>Mint paused</>}
+          </div>
+          {statusFlag === 2 && remainSeconds() > 0 && startTime > 0 && (
+            <div className='timer'>{getTimeString(remainSeconds())}</div>
           )}
-
-          {remainSeconds() <= 0 && (
-            <div className="publicsale-container">
-              <div className='title'>
-                {paused && <>Paused</>}
-                {!paused && (remainTokenCount === 0 ? <>Sold out</> : <>Public Sale</>)}
+          <div className='info'>
+            <div className='account-info'>
+              <div className='item'>
+                <label>Ticket:</label>
+                <span>{ticketCount}</span>
+              </div>
+              <div className='item'>
+                <label>Token:</label>
+                <span>{ticketCount}</span>
               </div>
             </div>
-          )}
-          
-          <GoogleReCaptchaProvider reCaptchaKey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}>
-            <MintButton onMint={() => setOpenedMintModal(true)} />
-          </GoogleReCaptchaProvider>
+            <div className='contract-info'>
+              <div className='item'>
+                <label>Remaining:</label>
+                <span>{ticketCount}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className='mint-wrapper'>
+            <GoogleReCaptchaProvider reCaptchaKey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}>
+              <MintButton onMint={() => setOpenedMintModal(true)} disabled={statusFlag !== 2 && statusFlag !== 3} />
+            </GoogleReCaptchaProvider>
+          </div>
         </div>
       </div>
       

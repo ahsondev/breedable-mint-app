@@ -35,8 +35,8 @@
       position: absolute;
       left: calc(50% - 150px);
       width: 300px;
-      top: calc(50% - 100px);
-      height: 200px;
+      top: calc(50% - 130px);
+      height: 260px;
       display: flex;
       align-items: center;
       flex-direction: column;
@@ -45,34 +45,61 @@
       border-radius: 20px;
       box-shadow: 0 0 15px 1px rgba(46, 196, 255, 1);
 
-      .presale-container {
-        margin: 0 0 10px 0;
-        .title {
-          font-family: 'Lato';
-          font-size: 40px;
-          font-weight: bold;
-          text-transform: uppercase;
-          text-align: center;
+      .title {
+        font-family: 'Lato';
+        font-size: 40px;
+        font-weight: bold;
+        text-transform: uppercase;
+        text-align: center;
+      }
+
+      .timer {
+        font-family: 'Lato';
+        font-size: 30px;
+        font-weight: bold;
+        text-transform: uppercase;
+        text-align: center;
+      }
+
+      .info {
+        display: flex;
+        flex-direction: column;
+        margin: 10px 0;
+
+        .item {
+          flex: 1;
+          margin: 0 20px 0 0;
+          display: flex;
+          justify-content: center;
+
+          label {
+            font-family: 'Lato';
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin: 0 6px 0 0;
+            color: #bbb;
+          }
+          span {
+            font-family: 'Lato';
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin: 0;
+
+          }
         }
 
-        .timer {
-          font-family: 'Lato';
-          font-size: 30px;
-          font-weight: bold;
-          text-transform: uppercase;
-          text-align: center;
+        .account-info {
+          display: flex;
+        }
+
+        .contract-info {
         }
       }
 
-      .publicsale-container {
-        margin: 0 0 20px 0;
-        .title {
-          font-family: 'Lato';
-          font-size: 40px;
-          font-weight: bold;
-          text-transform: uppercase;
-          text-align: center;
-        }
+      .mint-wrapper {
+        margin: 10px 0 0 0;
       }
     }
   }

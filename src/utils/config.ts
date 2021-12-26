@@ -35,7 +35,9 @@ const config = {
 } as any
 
 export const actionTypes = {
-  SAMPLE_ACTION: 'SAMPLE_ACTION'
+  CONNECT_WALLET: 'CONNECT_WALLET',
+  READ_STATUS: 'READ_STATUS',
+  ACCOUNT_STATUS: 'ACCOUNT_STATUS'
 }
 
 export default config

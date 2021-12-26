@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { BrainDance, connectToWallet } from 'utils/web3_api'
-import { NotificationManager } from 'components/Notification'
 import Loader from 'components/Loader'
 import contractConfig from 'contracts/config.json'
 import api from 'utils/api'
 import './Admin.scoped.scss'
+import { headerToken } from 'utils/helper'
+import { NotificationManager } from 'components/Notification'
 
 const wnd = window as any
 
@@ -14,7 +15,7 @@ const Admin = (props: Props) => {
   const [metamaskAccount, setMetamaskAccount] = useState('')
   const [loading, setLoading] = useState(false)
   const [web3, setWeb3] = useState<any>(null)
-  const [contract, setContract] = useState<BrainDance>(new BrainDance())
+  const [contract, setContract] = useState<any>(null)
 
   const connectMetamask = async (e: any) => {
     const connectRes = await connectToWallet()
@@ -24,8 +25,6 @@ const Admin = (props: Props) => {
       setContract(connectRes.contract)
       const account = wnd.ethereum.selectedAddress
       setMetamaskAccount(account)
-      console.log("Connected ...")
-      console.log("Connected Address: ", account)
     }
   }
 
@@ -33,49 +32,39 @@ const Admin = (props: Props) => {
     connectMetamask(null)
   }, [])
 
-  const handleWithdraw = () => {
+  const handleStartTime = async () => {
     setLoading(true)
     try {
-      contract.withdrawEth(metamaskAccount).on('transactionHash', function(hash: any) {
-        setLoading(false)
+      await api.post('/set-starttime', {
+        address: metamaskAccount
+      }, {
+        headers: headerToken(metamaskAccount)
       })
-      .on('receipt', function(receipt: any) {
-        console.log("receipt", receipt)
-        setLoading(false)
-      })
-      .on('confirmation', function(confirmationNumber: any, receipt: any) {
-        setLoading(false)
-      })
-      .on('error', (err: any) => {
-        setLoading(false)
-        console.error(err)
-      }); // If a out of gas error, the second parameter is the receipt.
+      NotificationManager.success('Starttime was set successfully', 'Success')
     } catch (ex) {
-      setLoading(false)
       console.log(ex)
+      NotificationManager.error('Starttime was not set successfully', 'Error')
     }
+    setLoading(false)
   }
 
-  const handleStartTime = () => {
+  const handlePause = async (pause: number) => {
     setLoading(true)
     try {
-      contract.setStarttime(metamaskAccount).then((res1: any) => {
-        contract.nativeContract.methods.startTime().call().then((res: any) => {
-          api.post('/set-starttime', {starttime: res}).then(res2 => {
-            NotificationManager.success('Starttime set')
-          }, err2 => {}).finally(() => {
-            setLoading(false)
-          })
-        }, (err: any) => {
-          console.log(err)
-        })
-      }, (err: any) => {}).finally(() => {
-        setLoading(false)
+      const contractObj = new BrainDance(contract)
+      await contractObj.setPause(metamaskAccount, pause !== 0)
+      await api.post('/set-pause', {
+        pause,
+        address: metamaskAccount
+      }, {
+        headers: headerToken(metamaskAccount)
       })
+      NotificationManager.success('bPaused was set successfully', 'Success')
     } catch (ex) {
-      setLoading(false)
       console.log(ex)
+      NotificationManager.error('bPaused was not set successfully', 'Error')
     }
+    setLoading(false)
   }
 
   return (
@@ -85,8 +74,10 @@ const Admin = (props: Props) => {
           <div>
             <button type='button' onClick={handleStartTime}>Set StartTime</button>
           </div>
-          <div style={{margin: '20px 0 0 0'}}>
-            <button type='button' onClick={handleWithdraw}>Withdraw</button>
+          <div>
+            <button type='button' onClick={() => handlePause(1)}>Set Pause</button>
+            <button type='button' onClick={() => handlePause(0)}>Clear Pause</button>
+            <button type='button' onClick={() => handlePause(-1)}>Set as not started</button>
           </div>
         </>
       )}

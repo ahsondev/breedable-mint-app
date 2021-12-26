@@ -45,20 +45,20 @@ export class BrainDance {
     this.nativeContract = contract
   }
 
-  mint(addr: string, mintPricePerToken: number, sign: number) {
+  mint(addr: string, mintPricePerToken: number) {
     const tx = {
       from: addr,
       to: contractConfig.contractAddress,
-      // gas: 50000, // 500 000 gas
+      gas: 300000, // 500 000 gas
       value: mintPricePerToken,
       // maxPriorityFeePerGas: 1999999987, // 199...987 wei
-      data: this.nativeContract.methods.mint(sign).encodeABI(),
+      data: this.nativeContract.methods.mint().encodeABI(),
     }
 
     return web3.eth.sendTransaction(tx)
   }
 
-  breed(addr: string, heroId1: number, heroId2: number, tokenUri: string, sign: number) {
+  breed(addr: string, heroId1: number, heroId2: number, tokenUri: string, sign: string) {
     const tx = {
       from: addr,
       to: contractConfig.contractAddress,
@@ -73,6 +73,15 @@ export class BrainDance {
       from: address,
       to: contractConfig.contractAddress,
       data: this.nativeContract.methods.setStarttime().encodeABI(),
+    }
+    return web3.eth.sendTransaction(tx)
+  }
+
+  setPause(address: string, pause: boolean) {
+    const tx = {
+      from: address,
+      to: contractConfig.contractAddress,
+      data: this.nativeContract.methods.setPause(pause).encodeABI(),
     }
     return web3.eth.sendTransaction(tx)
   }

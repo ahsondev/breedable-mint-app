@@ -11,7 +11,7 @@ interface PropsType {
 }
 
 const MintButton = (props: PropsType) => {
-  const { onMint } = props
+  const { onMint, disabled } = props
   const { executeRecaptcha } = useGoogleReCaptcha()
 
   const verifyRecaptcha = async () => {
@@ -38,7 +38,7 @@ const MintButton = (props: PropsType) => {
   }
 
   return (
-    <button onClick={handleMint} type='button' className='mint'>
+    <button onClick={handleMint} type='button' className='mint' disabled={disabled}>
       Jack In
     </button>
   )
