@@ -25,10 +25,9 @@ const Home = (props: Props) => {
   const contract = useSelector((state: any) => state.contract.contract)
   const price = useSelector((state: any) => state.contract.price)
   const statusFlag = useSelector((state: any) => state.contract.statusFlag)
-  const presaleReservedTokenCount = useSelector((state: any) => state.contract.presaleReservedTokenCount)
-  const presaleReservedAddressCount = useSelector((state: any) => state.contract.presaleReservedAddressCount)
-  const presaleTokenCount = useSelector((state: any) => state.contract.presaleTokenCount)
-  const presaleAddressLimit = useSelector((state: any) => state.contract.presaleAddressLimit)
+  const mintedInitialTokenCount = useSelector((state: any) => state.contract.mintedInitialTokenCount)
+  const tokenCount = useSelector((state: any) => state.contract.tokenCount)
+  const ticketTokenCount = useSelector((state: any) => state.contract.ticketTokenCount)
   const ticketCount = useSelector((state: any) => state.contract.ticketCount)
   const dispatch = useDispatch() as any
 
@@ -94,6 +93,11 @@ const Home = (props: Props) => {
       return
     }
 
+    if (!mintEnabled()) {
+      NotificationManager.warning('Mint sale has ended', 'Mint sale ended')
+      return
+    }
+
     setLoading(true)
     try {
       const contractBD = new BrainDance(contract)
@@ -115,6 +119,16 @@ const Home = (props: Props) => {
 
   const remainSeconds = () => {
     return Math.round(startTime - currentTime / 1000) + 24 * 3600
+  }
+
+  const mintEnabled = () => {
+    if (statusFlag === 2) {
+      return (ticketTokenCount + 1 <= ticketCount)
+    }
+    if (statusFlag === 3) {
+      return (tokenCount + 1 <= 3)
+    }
+    return false
   }
 
   return (
@@ -157,20 +171,20 @@ const Home = (props: Props) => {
               </div>
               <div className='item'>
                 <label>Token:</label>
-                <span>{ticketCount}</span>
+                <span>{tokenCount}</span>
               </div>
             </div>
             <div className='contract-info'>
               <div className='item'>
                 <label>Remaining:</label>
-                <span>{ticketCount}</span>
+                <span>{10101 - mintedInitialTokenCount - 1500 < 1500 ? 10101 - mintedInitialTokenCount : 10101 - mintedInitialTokenCount - 1500}</span>
               </div>
             </div>
           </div>
 
           <div className='mint-wrapper'>
             <GoogleReCaptchaProvider reCaptchaKey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}>
-              <MintButton onMint={() => setOpenedMintModal(true)} disabled={statusFlag !== 2 && statusFlag !== 3} />
+              <MintButton onMint={() => setOpenedMintModal(true)} disabled={!mintEnabled()} />
             </GoogleReCaptchaProvider>
           </div>
         </div>
