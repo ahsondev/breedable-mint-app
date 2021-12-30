@@ -6,13 +6,11 @@ const initialState = {
   price: 0,
   statusFlag: 0,
   presaleReservedTokenCount: 0,
-  presaleReservedAddressCount: 0,
   presaleTokenCount: 0,
-  presaleAddressLimit: 0,
   ticketCount: 0,
-  ticketTokenCount: 0,
   tokenCount: 0,
   mintedInitialTokenCount: 0,
+  INITIAL_TOKEN_COUNT: 0,
 }
 
 const contract = (state = initialState, action: ActionType) => {

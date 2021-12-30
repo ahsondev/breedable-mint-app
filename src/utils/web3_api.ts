@@ -40,49 +40,47 @@ const web3Modal = new Web3Modal({
 
 export class BrainDance {
   nativeContract: any = null
+  gasConfig: any = {
+    gas: 300000,
+    maxPriorityFeePerGas: 1000000000, // 199...987 wei
+  }
 
   constructor(contract: any) {
     this.nativeContract = contract
   }
 
-  mint(addr: string, mintPricePerToken: number) {
+  mintWhitelist(addr: string, mintPricePerToken: number, count: number, sign: string) {
     const tx = {
       from: addr,
       to: contractConfig.contractAddress,
-      gas: 300000, // 500 000 gas
-      value: mintPricePerToken,
-      // maxPriorityFeePerGas: 1999999987, // 199...987 wei
-      data: this.nativeContract.methods.mint().encodeABI(),
+      value: mintPricePerToken * count,
+      data: this.nativeContract.methods.mintWhitelist(sign, count).encodeABI(),
+      ...this.gasConfig,
     }
 
     return web3.eth.sendTransaction(tx)
   }
 
-  breed(addr: string, heroId1: number, heroId2: number, tokenUri: string, sign: string) {
+  mint(addr: string, mintPricePerToken: number, count: number) {
     const tx = {
       from: addr,
       to: contractConfig.contractAddress,
-      data: this.nativeContract.methods.mintBreedToken(sign, tokenUri, heroId1, heroId2).encodeABI(),
+      value: mintPricePerToken * count,
+      data: this.nativeContract.methods.mint(count).encodeABI(),
+      ...this.gasConfig,
     }
 
     return web3.eth.sendTransaction(tx)
   }
 
-  setStarttime(address: string) {
+  setStatusFlag(addr: string, statusFlag: number) {
     const tx = {
-      from: address,
+      from: addr,
       to: contractConfig.contractAddress,
-      data: this.nativeContract.methods.setStarttime().encodeABI(),
+      data: this.nativeContract.methods.setStatusFlag(statusFlag).encodeABI(),
+      ...this.gasConfig,
     }
-    return web3.eth.sendTransaction(tx)
-  }
 
-  setPause(address: string, pause: boolean) {
-    const tx = {
-      from: address,
-      to: contractConfig.contractAddress,
-      data: this.nativeContract.methods.setPause(pause).encodeABI(),
-    }
     return web3.eth.sendTransaction(tx)
   }
 }

@@ -24,19 +24,17 @@ export const getContractStatus = (contract: any) => (dispatch: any) => new Promi
     const price = Number(await contract.methods.mintPrice().call())
     const statusFlag = Number(await contract.methods.statusFlag().call())
     const presaleReservedTokenCount = Number(await contract.methods.presaleReservedTokenCount().call())
-    const presaleReservedAddressCount = Number(await contract.methods.presaleReservedAddressCount().call())
     const presaleTokenCount = Number(await contract.methods.presaleTokenCount().call())
-    const presaleAddressLimit = Number(await contract.methods.presaleAddressLimit().call())
     const mintedInitialTokenCount = Number(await contract.methods.mintedInitialTokenCount().call())
+    const INITIAL_TOKEN_COUNT = Number(await contract.methods.INITIAL_TOKEN_COUNT().call())
 
     const payload = {
       price,
       statusFlag,
       presaleReservedTokenCount,
-      presaleReservedAddressCount,
       presaleTokenCount,
-      presaleAddressLimit,
       mintedInitialTokenCount,
+      INITIAL_TOKEN_COUNT,
     }
 
     dispatch({
@@ -57,12 +55,10 @@ export const getAccountStatus = (contract: any, account: string) => (dispatch: a
 
   try {
     const ticketCount = Number(await contract.methods.tickets(account).call())
-    const ticketTokenCount = Number(await contract.methods.ticketTokens(account).call())
     const tokenCount = Number(await contract.methods.balanceOf(account).call())
 
     const payload = {
       ticketCount,
-      ticketTokenCount,
       tokenCount,
     }
 

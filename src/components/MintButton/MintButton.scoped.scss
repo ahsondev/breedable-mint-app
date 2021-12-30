@@ -12,6 +12,7 @@
   height: 40px;
   border-radius: 100px;
   transition: all 0.7s;
+  padding: unset !important;
 
   &:hover:not(:active) {
     background: linear-gradient(45deg, #ae00ff, #8700FF);

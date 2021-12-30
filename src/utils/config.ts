@@ -32,6 +32,7 @@ const config = {
       alchemyWssUrl: process.env.REACT_APP_ALCHEMY_KOVAN_WSS_URL
     }
   },
+  initialTokenCount: 10101,
 } as any
 
 export const actionTypes = {
