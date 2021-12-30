@@ -88,7 +88,7 @@ async function getWhitelist(req, res) {
       const token = encrypt(encryptNumberRsa(utcSeconds).toString())
       res.json({token})
     } else {
-      res.status(500).json({ msg: 'No whitelist' })
+      res.json({ msg: 'You are not added to whitelist' })
     }
   } catch (e) {
     console.log(e)
