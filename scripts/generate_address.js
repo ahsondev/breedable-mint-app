@@ -13,7 +13,7 @@ function getRandomAddress() {
 
 const addresses = []
 const map = {}
-for (let i = 0; i < 1000000; i += 1) {
+for (let i = 0; i < 100000; i += 1) {
   let addr = getRandomAddress()
   while (map[addr]) {
     addr = getRandomAddress()

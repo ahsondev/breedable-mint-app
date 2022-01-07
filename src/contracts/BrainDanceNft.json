@@ -304,13 +304,19 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "count",
+        "name": "",
         "type": "uint256"
       }
     ],
-    "name": "buyTicket",
-    "outputs": [],
-    "stateMutability": "payable",
+    "name": "countLimit",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -394,11 +400,6 @@
           },
           {
             "internalType": "uint256",
-            "name": "birthday",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
             "name": "fatherId",
             "type": "uint256"
           },
@@ -431,11 +432,6 @@
           {
             "internalType": "uint256",
             "name": "traits",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "birthday",
             "type": "uint256"
           },
           {
@@ -497,9 +493,14 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "sign",
-        "type": "uint256"
+        "internalType": "bytes32[]",
+        "name": "proof",
+        "type": "bytes32[]"
+      },
+      {
+        "internalType": "address",
+        "name": "leaf",
+        "type": "address"
       },
       {
         "internalType": "string",
@@ -523,19 +524,6 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "mintPrice",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "address",
@@ -556,9 +544,9 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "sign",
-        "type": "uint256"
+        "internalType": "bytes32[]",
+        "name": "proof",
+        "type": "bytes32[]"
       },
       {
         "internalType": "uint256",
@@ -566,7 +554,7 @@
         "type": "uint256"
       }
     ],
-    "name": "mintWhitelist",
+    "name": "mintVip",
     "outputs": [],
     "stateMutability": "payable",
     "type": "function"
@@ -630,34 +618,14 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "presaleReservedTokenCount",
-    "outputs": [
+    "inputs": [
       {
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
       }
     ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "presaleTokenCount",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "presaleTokenLimit",
+    "name": "prices",
     "outputs": [
       {
         "internalType": "uint256",
@@ -773,38 +741,25 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
+        "internalType": "address",
+        "name": "owner1",
+        "type": "address"
+      }
+    ],
+    "name": "setOwner1Address",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256[]",
         "name": "price",
-        "type": "uint256"
+        "type": "uint256[]"
       }
     ],
-    "name": "setMintPrice",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "limit",
-        "type": "uint256"
-      }
-    ],
-    "name": "setPresaleTokenLimit",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "token",
-        "type": "uint256"
-      }
-    ],
-    "name": "setSignatureToken",
+    "name": "setPrice",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -825,22 +780,14 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "price",
-        "type": "uint256"
-      }
-    ],
-    "name": "setTicketPrice",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
+        "internalType": "bytes32[]",
+        "name": "proof",
+        "type": "bytes32[]"
+      },
       {
-        "internalType": "uint256",
-        "name": "sign",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "leaf",
+        "type": "address"
       },
       {
         "internalType": "uint256",
@@ -855,11 +802,6 @@
       {
         "internalType": "uint256",
         "name": "heroTraits_",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "heroBirthday_",
         "type": "uint256"
       },
       {
@@ -912,6 +854,30 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "stepBalance",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "bytes4",
         "name": "interfaceId",
         "type": "bytes4"
@@ -936,38 +902,6 @@
         "internalType": "string",
         "name": "",
         "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "ticketPrice",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "tickets",
-    "outputs": [
-      {
-        "internalType": "uint8",
-        "name": "",
-        "type": "uint8"
       }
     ],
     "stateMutability": "view",
@@ -1063,13 +997,6 @@
   {
     "inputs": [],
     "name": "withdrawAll",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "withdrawTicket",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

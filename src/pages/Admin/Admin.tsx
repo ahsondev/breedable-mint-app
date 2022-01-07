@@ -15,6 +15,7 @@ interface Props {}
 
 const Admin = (props: Props) => {
   const [loading, setLoading] = useState(false)
+  const [rootValue, setRootValue] = useState('')
   
   const web3 = useSelector((state: any) => state.contract.web3)
   const contract = useSelector((state: any) => state.contract.contract)
@@ -24,54 +25,41 @@ const Admin = (props: Props) => {
     dispatch(connectToMetamask())
   }, [])
 
-  const handlePresale = async () => {
+  const handleSetStatus = async (statusFlag: number) => {
     setLoading(true)
     try {
       const addr = window.ethereum.selectedAddress
       const contractBD = new BrainDance(contract)
-      await contractBD.setStatusFlag(addr, 2)
-      await api.post('/set-starttime', {
+      await contractBD.setStatusFlag(addr, statusFlag)
+      await api.post('/admin/set-starttime', {
         address: addr
       }, {
         headers: headerToken(addr)
       })
-      NotificationManager.success('Presale was set successfully', 'Success')
+      NotificationManager.success('Operation was done successfully', 'Success')
     } catch (ex) {
       console.log(ex)
-      NotificationManager.error('Presale was not set successfully', 'Error')
+      NotificationManager.error('Operation was not done successfully', 'Error')
     }
     setLoading(false)
   }
 
-  const handlePublicSale1 = async () => {
+  const handleGetRoot = async (statusFlag: number) => {
     setLoading(true)
     try {
+      const url = statusFlag === 4 ? '/admin/get-sign-root' : '/admin/get-whitelist-root'
       const addr = window.ethereum.selectedAddress
-      const contractBD = new BrainDance(contract)
-      await contractBD.setStatusFlag(addr, 3)
-      await api.post('/set-starttime', {
-        address: addr
+      const {data} = await api.post(url, {
+        address: addr,
+        step: statusFlag
       }, {
         headers: headerToken(addr)
       })
-      NotificationManager.success('Public sale (24hours) was set successfully', 'Success')
+      NotificationManager.success('Operation was done successfully', 'Success')
+      setRootValue(data.root)
     } catch (ex) {
       console.log(ex)
-      NotificationManager.error('Public sale (24hours) not set successfully', 'Error')
-    }
-    setLoading(false)
-  }
-
-  const handlePublicSale2 = async () => {
-    setLoading(true)
-    try {
-      const addr = window.ethereum.selectedAddress
-      const contractBD = new BrainDance(contract)
-      await contractBD.setStatusFlag(addr, 4)
-      NotificationManager.success('Public sale (24hours) was set successfully', 'Success')
-    } catch (ex) {
-      console.log(ex)
-      NotificationManager.error('Public sale (24hours) not set successfully', 'Error')
+      NotificationManager.error('Operation was not done successfully', 'Error')
     }
     setLoading(false)
   }
@@ -133,9 +121,17 @@ const Admin = (props: Props) => {
       {isOwner() && (
         <>
           <div>
-            <button type='button' onClick={handlePresale}>start presale</button>
-            <button type='button' onClick={handlePublicSale1}>start public sale (24hours)</button>
-            <button type='button' onClick={handlePublicSale2}>start public sale (without 24hours)</button>
+            <button type='button' onClick={() => handleSetStatus(1)}>start VIP1</button>
+            <button type='button' onClick={() => handleSetStatus(2)}>start VIP2</button>
+            <button type='button' onClick={() => handleSetStatus(3)}>start VIP3</button>
+            <button type='button' onClick={() => handleSetStatus(4)}>start Public Sale</button>
+          </div>
+          <div>
+            <button type='button' onClick={() => handleGetRoot(1)}>Get Sign VIP1</button>
+            <button type='button' onClick={() => handleGetRoot(2)}>Get Sign VIP2</button>
+            <button type='button' onClick={() => handleGetRoot(3)}>Get Sign VIP3</button>
+            <button type='button' onClick={() => handleGetRoot(4)}>Get Sign</button>
+            <span>{rootValue}</span>
           </div>
         </>
       )}

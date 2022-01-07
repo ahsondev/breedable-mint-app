@@ -1,7 +1,6 @@
 const db = require('../models')
 const Setting = db.Setting
-const {encrypt, decrypt, getUTCSeconds, round} = require('../services/helper')
-const {encryptNumberRsa} = require('../services/rsa')
+const {decrypt, getMerkleData} = require('../services/helper')
 
 async function authenticate(req, res, next) {
   const addressToken = (req.header('X-GOLDEN-TOKEN1') || "") + (req.header('X-GOLDEN-TOKEN2') || "")
@@ -14,35 +13,21 @@ async function authenticate(req, res, next) {
   res.status(401).json({'msg': 'Authentication Error'})
 }
 
-async function mint(req, res) {
+async function mintWhitelist(req, res) {
   try {
-    const token = encrypt('1')
-    res.json({token})
-  } catch (e) {
-    console.log(e)
-    res.status(500).json({ msg: 'Server Error' })
-  }
-}
-
-async function setStarttime(req, res) {
-  try {
-    const rows = await Setting.findAll({ where: { key: 'starttime' }})
-    const starttime = await getUTCSeconds()
-    if (rows.length === 0) {
-      await Setting.create({ key: 'starttime', value: starttime })
-    } else {
-      await Setting.update(
-        { value: starttime },
-        { where: { key: 'starttime' } }
-      )
+    if (!req.body.address || !req.body.step) {
+      res.status(500).json({ msg: 'Parameter Error' })
+      return
     }
-    res.json({ msg: 'success' })
+
+    const rows = (await db.WhiteList.findAll({ where: { step: req.body.step }})).map(v => v.get({plane: true}).address)
+    const ret = getMerkleData(req.body.address, rows)
+    res.json(ret)
   } catch (e) {
     console.log(e)
     res.status(500).json({ msg: 'Server Error' })
   }
 }
-
 
 async function getStarttime(req, res) {
   try {
@@ -56,52 +41,8 @@ async function getStarttime(req, res) {
   }
 }
 
-
-async function upgradeNft(req, res) {
-  try {
-    const setting = await Setting.findOne({
-      where: { key: 'starttime' }
-    })
-    res.json({ starttime: Number(setting.get({plane: true}).value) })
-  } catch (e) {
-    console.log(e)
-    res.status(500).json({ msg: 'Server Error' })
-  }
-}
-
-async function getToken(req, res) {
-  try {
-    const utcSeconds = await getUTCSeconds()
-    const token = encrypt(encryptNumberRsa(utcSeconds).toString())
-    res.json({token})
-  } catch (e) {
-    console.log(e)
-    res.status(500).json({ msg: 'Server Error' })
-  }
-}
-
-async function getWhitelist(req, res) {
-  try {
-    const rows = await db.WhiteList.findAll({where: { address: req.body.address }})
-    if (rows.length > 0) {
-      const utcSeconds = await getUTCSeconds()
-      const token = encrypt(encryptNumberRsa(utcSeconds).toString())
-      res.json({token})
-    } else {
-      res.json({ msg: 'You are not added to whitelist' })
-    }
-  } catch (e) {
-    console.log(e)
-    res.status(500).json({ msg: 'Server Error' })
-  }
-}
-
 module.exports = {
   authenticate,
-  mint,
-  setStarttime,
   getStarttime,
-  upgradeNft,
-  getToken,
-  getWhitelist,
+  mintWhitelist,
 }

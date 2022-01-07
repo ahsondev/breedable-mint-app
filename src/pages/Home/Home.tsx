@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { BrainDance, connectToWallet } from 'utils/web3_api'
+import { BrainDance } from 'utils/web3_api'
 import { NotificationManager } from 'components/Notification'
 import Loader from 'components/Loader'
 import api from 'utils/api'
@@ -19,27 +19,34 @@ interface Props {}
 const Home = (props: Props) => {
   const [loading, setLoading] = useState(false)
   const [startTime, setStartTime] = useState(0)
-  const [currentTime, setCurrentTime] = useState((new Date()).getTime())
   const [saleTimer, setSaleTimer] = useState(1000)
   const [openedMintModal, setOpenedMintModal] = useState(false)
-  const [mintAmount, setMintAmount] = useState(0)
+  const [mintAmount, setMintAmount] = useState(1)
 
   const web3 = useSelector((state: any) => state.contract.web3)
   const contract = useSelector((state: any) => state.contract.contract)
   const price = useSelector((state: any) => state.contract.price)
   const statusFlag = useSelector((state: any) => state.contract.statusFlag)
   const mintedInitialTokenCount = useSelector((state: any) => state.contract.mintedInitialTokenCount)
-  const presaleReservedTokenCount = useSelector((state: any) => state.contract.presaleReservedTokenCount)
-  const presaleTokenCount = useSelector((state: any) => state.contract.presaleTokenCount)
-  const tokenCount = useSelector((state: any) => state.contract.tokenCount)
-  const ticketCount = useSelector((state: any) => state.contract.ticketCount)
+  const stepBalance = useSelector((state: any) => state.contract.stepBalance)
+  const countLimit = useSelector((state: any) => state.contract.countLimit)
   const INITIAL_TOKEN_COUNT = useSelector((state: any) => state.contract.INITIAL_TOKEN_COUNT)
   const dispatch = useDispatch() as any
+
+  const titleArr = [
+    'Not started',
+    'Gold VIP',
+    'Silver vIP',
+    'Bronze VIP',
+    'Public Sale',
+    'Ended',
+    'Paused',
+  ]
 
   const onTimer = useCallback(async () => {
     dispatch(getContractStatus(contract))
     dispatch(getAccountStatus(contract, wnd.ethereum.selectedAddress))
-  }, [contract])
+  }, [dispatch, contract])
 
   const onTimerSecond = useCallback(() => {
     setSaleTimer(saleTimer <= 0 ? 0 : saleTimer - 1)
@@ -51,7 +58,7 @@ const Home = (props: Props) => {
       dispatch(getAccountStatus(res.contract, wnd.ethereum.selectedAddress))
       
     }, (err: any) => {})
-  }, [])
+  }, [dispatch])
 
   useEffect(() => {
     onTimer()
@@ -60,8 +67,6 @@ const Home = (props: Props) => {
       clearInterval(counter)
     })
   }, [onTimer])
-
-  useEffect(() => {}, [])
 
   useEffect(() => {
     const counter = setInterval(onTimerSecond, 1000)
@@ -76,7 +81,9 @@ const Home = (props: Props) => {
       setStartTime(Number(res.data.starttime));
       const {data} = await axios.get('http://worldtimeapi.org/api/timezone/gmt')
       const currentTime = Math.round((new Date(data.utc_datetime)).getTime() / 1000)
-      setSaleTimer(Number(res.data.starttime) - currentTime + (statusFlag === 2 ? 4 : 24) * 3600)
+      
+      const periods = [0, 72, 24, 24, 24]
+      setSaleTimer(Number(res.data.starttime) - currentTime + periods[statusFlag] * 3600)
     })()
   }, [statusFlag])
   
@@ -95,13 +102,18 @@ const Home = (props: Props) => {
       return
     }
 
-    if (statusFlag < 2) {
+    if (statusFlag === 0) {
       NotificationManager.warning('Mint sale is not started', 'Not started')
       return
     }
 
     if (statusFlag === 5) {
-      NotificationManager.warning('Mint sale has ended', 'Mint sale ended')
+      NotificationManager.warning('Mint sale has been ended', 'Mint sale been ended')
+      return
+    }
+
+    if (statusFlag === 6) {
+      NotificationManager.warning('Mint sale has been paused', 'Mint sale been ended')
       return
     }
 
@@ -119,21 +131,21 @@ const Home = (props: Props) => {
     try {
       const contractBD = new BrainDance(contract)
 
-      if (statusFlag === 2) {
+      if (statusFlag !== 4) {
         const addr = window.ethereum.selectedAddress
-        const { data } = await api.post('/get-whitelist', {
-          address: addr
+        const { data } = await api.post('/mint-whitelist', {
+          address: addr,
+          step: statusFlag,
         }, {
           headers: headerToken(addr)
         })
-        if (!data.token) {
-          NotificationManager.error(data.msg, 'Error')
+        if (!data.verified) {
+          NotificationManager.error("You are not added to the whitelist", 'Error')
           setLoading(false)
           return
         }
-        const sign = decrypt(data.token)
-        await contractBD.mintWhitelist(account, price, mintAmount, sign)
-      } else if (statusFlag === 3 || statusFlag === 4) {
+        await contractBD.mintVIP(account, price, mintAmount, data.proof)
+      } else {
         await contractBD.mint(account, price, mintAmount)
       }
       
@@ -153,19 +165,9 @@ const Home = (props: Props) => {
   }
 
   const mintEnabled = (count: number) => {
-    if (!(tokenCount + count <= 3 && [2, 3, 4].includes(statusFlag))) {
+    if (!(stepBalance + count <= countLimit && [1, 2, 3, 4].includes(statusFlag))) {
       return false;
     }
-    
-    if (statusFlag === 3) {
-      if (tokenCount + count > ticketCount) {
-        const publicTokenAvailable = (INITIAL_TOKEN_COUNT - mintedInitialTokenCount) - (presaleReservedTokenCount - presaleTokenCount)
-        return tokenCount + count - ticketCount <= publicTokenAvailable;
-      }
-
-      return true;
-    }
-
     return count <= INITIAL_TOKEN_COUNT - mintedInitialTokenCount;
   }
 
@@ -192,24 +194,16 @@ const Home = (props: Props) => {
         </div>
         <div className='button-wrapper'>
           <div className='title'>
-            {statusFlag < 2 && <>Not started</>}
-            {statusFlag === 2 && <>Presale</>}
-            {(statusFlag === 3 || statusFlag === 4) && <>Public sale</>}
-            {statusFlag === 5 && <>Mint ended</>}
-            {statusFlag === 6 && <>Mint paused</>}
+            {titleArr[statusFlag]}
           </div>
-          {(statusFlag === 2 || statusFlag === 3) && saleTimer > 0 && startTime > 0 && (
+          {[1, 2, 3].includes(statusFlag) && saleTimer > 0 && startTime > 0 && (
             <div className='timer'>{getTimeString(saleTimer)}</div>
           )}
           <div className='info'>
             <div className='account-info'>
               <div className='item'>
-                <label>Ticket:</label>
-                <span>{ticketCount}</span>
-              </div>
-              <div className='item'>
                 <label>Token:</label>
-                <span>{tokenCount}</span>
+                <span>{stepBalance}</span>
               </div>
             </div>
             <div className='contract-info'>
@@ -218,17 +212,17 @@ const Home = (props: Props) => {
                 <span>{INITIAL_TOKEN_COUNT - mintedInitialTokenCount - 1500 < 1500 ? INITIAL_TOKEN_COUNT - mintedInitialTokenCount : INITIAL_TOKEN_COUNT - mintedInitialTokenCount - 1500}</span>
               </div>
             </div>
-            {mintEnabled(1) && (
+            {countLimit > 1 && (
               <div className='amount-selector'>
-                {[1, 2, 3].map(v => (
+                {[...Array(countLimit).keys()].map(v => (
                   <button
-                    key={v}
+                    key={v + 1}
                     type='button'
-                    onClick={() => setMintAmount(v)}
-                    className={v === mintAmount ? "selected" : ""}
-                    disabled={!mintEnabled(v)}
+                    onClick={() => setMintAmount(v + 1)}
+                    className={v + 1 === mintAmount ? "selected" : ""}
+                    disabled={!mintEnabled(v + 1)}
                   >
-                    {v}
+                    {v + 1}
                   </button>
                 ))}
               </div>
@@ -237,7 +231,7 @@ const Home = (props: Props) => {
 
           <div className='mint-wrapper'>
             <GoogleReCaptchaProvider reCaptchaKey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}>
-              <MintButton onMint={() => setOpenedMintModal(true)} disabled={!(mintEnabled(1) && mintAmount > 0)} />
+              <MintButton onMint={() => setOpenedMintModal(true)} disabled={!(mintEnabled(1))} />
             </GoogleReCaptchaProvider>
           </div>
         </div>

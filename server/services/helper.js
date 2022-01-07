@@ -1,6 +1,8 @@
 const config = require('../config')
 const CryptoJS = require('crypto-js')
 const axios = require('axios')
+const { MerkleTree } = require('merkletreejs')
+const keccak256 = require('keccak256')
 
 const encrypt = (data) =>
   CryptoJS.AES.encrypt(JSON.stringify(data), config.CRYPTO_KEY).toString()
@@ -29,9 +31,20 @@ const getUTCSeconds = async () => {
   return Math.floor(date.getTime() / 1000)
 }
 
+function getMerkleData(address, arr) {
+  const leaves = arr.map((v) => keccak256(v))
+  const tree = new MerkleTree(leaves, keccak256, { sort: true })
+  const root = tree.getHexRoot()
+  const leaf = keccak256(address)
+  const proof = tree.getHexProof(leaf)
+  const verified = tree.verify(proof, leaf, root)
+  return { proof, leaf, verified, address }
+}
+
 module.exports = {
   encrypt,
   decrypt,
   getUTCSeconds,
-  round
+  round,
+  getMerkleData
 }

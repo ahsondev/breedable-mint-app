@@ -3,15 +3,18 @@ const Controllers = require('../controllers')
 
 const router = new Router()
 
+// auth middleware
 router.post('/*', Controllers.Main.authenticate)
 router.put('/*', Controllers.Main.authenticate)
 router.delete('/*', Controllers.Main.authenticate)
 
-router.post('/upgrade-nft', Controllers.Main.upgradeNft)
-router.post('/mint', Controllers.Main.mint)
+// admin routes
+router.post('/admin/get-sign-root', Controllers.Admin.getSignRoot)
+router.post('/admin/get-whitelist-root', Controllers.Admin.getWhitelistRoot)
+router.post('/admin/set-starttime', Controllers.Admin.setStarttime)
+
+// main routes
+router.post('/mint-whitelist', Controllers.Main.mintWhitelist)
 router.get('/get-starttime', Controllers.Main.getStarttime)
-router.post('/set-starttime', Controllers.Main.setStarttime)
-router.post('/get-whitelist', Controllers.Main.getWhitelist)
-// router.get('/token', Controllers.Main.getToken)
 
 module.exports = router;

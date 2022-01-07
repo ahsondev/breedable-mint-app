@@ -31,5 +31,6 @@ db.connectionSeq = connectionSeq
 
 db.Setting = require('./Setting')(connectionSeq, Sequelize)
 db.WhiteList = require('./WhiteList')(connectionSeq, Sequelize)
+db.SignAddress = require('./SignAddress')(connectionSeq, Sequelize)
 
 module.exports = db

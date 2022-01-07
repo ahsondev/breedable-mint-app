@@ -21,19 +21,23 @@ export const getContractStatus = (contract: any) => (dispatch: any) => new Promi
   }
 
   try {
-    const price = Number(await contract.methods.mintPrice().call())
     const statusFlag = Number(await contract.methods.statusFlag().call())
-    const presaleReservedTokenCount = Number(await contract.methods.presaleReservedTokenCount().call())
-    const presaleTokenCount = Number(await contract.methods.presaleTokenCount().call())
+    const price = Number(await contract.methods.prices(statusFlag).call())
+    const breedPrice = Number(await contract.methods.breedPrice().call())
+    const upgradePrice = Number(await contract.methods.upgradePrice().call())
     const mintedInitialTokenCount = Number(await contract.methods.mintedInitialTokenCount().call())
+    const breedTokenCount = Number(await contract.methods.breedTokenCount().call())
+    const countLimit = Number(await contract.methods.countLimit(statusFlag).call())
     const INITIAL_TOKEN_COUNT = Number(await contract.methods.INITIAL_TOKEN_COUNT().call())
 
     const payload = {
       price,
+      breedPrice,
+      upgradePrice,
       statusFlag,
-      presaleReservedTokenCount,
-      presaleTokenCount,
       mintedInitialTokenCount,
+      breedTokenCount,
+      countLimit,
       INITIAL_TOKEN_COUNT,
     }
 
@@ -54,12 +58,11 @@ export const getAccountStatus = (contract: any, account: string) => (dispatch: a
   }
 
   try {
-    const ticketCount = Number(await contract.methods.tickets(account).call())
-    const tokenCount = Number(await contract.methods.balanceOf(account).call())
+    const statusFlag = Number(await contract.methods.statusFlag().call())
+    const stepBalance = Number(await contract.methods.stepBalance(statusFlag, account).call())
 
     const payload = {
-      ticketCount,
-      tokenCount,
+      stepBalance,
     }
 
     dispatch({

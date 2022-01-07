@@ -4,13 +4,14 @@ const initialState = {
   web3: null as any,
   contract: null as any,
   price: 0,
+  breedPrice: 0,
+  upgradePrice: 0,
   statusFlag: 0,
-  presaleReservedTokenCount: 0,
-  presaleTokenCount: 0,
-  ticketCount: 0,
-  tokenCount: 0,
   mintedInitialTokenCount: 0,
+  breedTokenCount: 0,
+  countLimit: 0,
   INITIAL_TOKEN_COUNT: 0,
+  stepBalance: 0,
 }
 
 const contract = (state = initialState, action: ActionType) => {
