@@ -1,15 +1,11 @@
 const db = require('../models')
 const Setting = db.Setting
-const {getUTCSeconds, getMerkleData} = require('../services/helper')
-const { MerkleTree } = require('merkletreejs')
-const keccak256 = require('keccak256')
+const {getUTCSeconds, getMerkleData, getMerkleRoot} = require('../services/helper')
 
 async function getSignRoot(req, res) {
   try {
     const signAddresses = (await db.SignAddress.findAll()).map(v => v.get({plane: true}).address)
-    const leaves = signAddresses.map(v => keccak256(v))
-    const tree = new MerkleTree(leaves, keccak256, { sort: true })
-    const root = tree.getHexRoot()
+    const root = getMerkleRoot(signAddresses)
     res.json({root})
   } catch (e) {
     console.log(e)
@@ -25,9 +21,7 @@ async function getWhitelistRoot(req, res) {
     }
 
     const whiteLists = (await db.WhiteList.findAll({ where: {step: req.body.step} })).map(v => v.get({plane: true}).address)
-    const leaves = whiteLists.map(v => keccak256(v))
-    const tree = new MerkleTree(leaves, keccak256, { sort: true })
-    const root = tree.getHexRoot()
+    const root = getMerkleRoot(whiteLists)
     res.json({root})
   } catch (e) {
     console.log(e)

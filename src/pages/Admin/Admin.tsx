@@ -60,8 +60,9 @@ const Admin = (props: Props) => {
 
       if (bSet) {
         const contractBD = new BrainDance(contract)
-        statusFlag === 4 ? contractBD.setRootSign(addr, data.root) : contractBD.setRootVip(addr, statusFlag, data.root)
+        statusFlag === 4 ? await contractBD.setRootSign(addr, data.root) : await contractBD.setRootVip(addr, statusFlag, data.root)
       }
+      NotificationManager.success('Operation was done successfully', 'Success')
     } catch (ex) {
       console.log(ex)
       NotificationManager.error('Operation was not done successfully', 'Error')
@@ -127,10 +128,13 @@ const Admin = (props: Props) => {
         <div>
           <div>
             <h2>Step</h2>
+            <button type='button' onClick={() => handleSetStatus(0)}>set as not-started</button>
             <button type='button' onClick={() => handleSetStatus(1)}>start VIP1</button>
             <button type='button' onClick={() => handleSetStatus(2)}>start VIP2</button>
             <button type='button' onClick={() => handleSetStatus(3)}>start VIP3</button>
             <button type='button' onClick={() => handleSetStatus(4)}>start Public Sale</button>
+            <button type='button' onClick={() => handleSetStatus(5)}>set as ended</button>
+            <button type='button' onClick={() => handleSetStatus(6)}>set paused</button>
           </div>
           <div>
             <h2>Get Root Sign <span style={{fontSize: '16px', fontWeight: 'normal'}}>{rootValue}</span></h2>

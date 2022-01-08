@@ -32,13 +32,19 @@ const getUTCSeconds = async () => {
 }
 
 function getMerkleData(address, arr) {
-  const leaves = arr.map((v) => keccak256(v))
+  const leaves = arr.map((v) => keccak256(v.toLowerCase()))
   const tree = new MerkleTree(leaves, keccak256, { sort: true })
   const root = tree.getHexRoot()
-  const leaf = keccak256(address)
+  const leaf = keccak256(address.toLowerCase())
   const proof = tree.getHexProof(leaf)
   const verified = tree.verify(proof, leaf, root)
   return { proof, leaf, verified, address }
+}
+
+function getMerkleRoot(arr) {
+  const leaves = arr.map((v) => keccak256(v.toLowerCase()))
+  const tree = new MerkleTree(leaves, keccak256, { sort: true })
+  return tree.getHexRoot()
 }
 
 module.exports = {
@@ -46,5 +52,6 @@ module.exports = {
   decrypt,
   getUTCSeconds,
   round,
-  getMerkleData
+  getMerkleData,
+  getMerkleRoot,
 }

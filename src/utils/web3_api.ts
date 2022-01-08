@@ -48,12 +48,12 @@ export class BrainDance {
     this.nativeContract = contract;
   }
 
-  mintVIP(addr: string, mintPricePerToken: number, count: number, proof: any) {
+  mintVip(addr: string, mintPricePerToken: number, count: number, proof: any) {
     const tx = {
       from: addr,
       to: contractConfig.contractAddress,
       value: mintPricePerToken * count,
-      data: this.nativeContract.methods.mintVIP(proof, count).encodeABI(),
+      data: this.nativeContract.methods.mintVip(proof, count).encodeABI(),
       ...this.gasConfig,
     };
 

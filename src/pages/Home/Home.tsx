@@ -82,7 +82,7 @@ const Home = (props: Props) => {
       const {data} = await axios.get('http://worldtimeapi.org/api/timezone/gmt')
       const currentTime = Math.round((new Date(data.utc_datetime)).getTime() / 1000)
       
-      const periods = [0, 72, 24, 24, 24]
+      const periods = [0, 48, 48, 48, 48]
       setSaleTimer(Number(res.data.starttime) - currentTime + periods[statusFlag] * 3600)
     })()
   }, [statusFlag])
@@ -144,7 +144,7 @@ const Home = (props: Props) => {
           setLoading(false)
           return
         }
-        await contractBD.mintVIP(account, price, mintAmount, data.proof)
+        await contractBD.mintVip(account, price, mintAmount, data.proof)
       } else {
         await contractBD.mint(account, price, mintAmount)
       }
