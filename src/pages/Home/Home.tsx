@@ -7,7 +7,7 @@ import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import MintButton from 'components/MintButton'
 import './Home.scoped.scss'
 import MintModal from 'pages/MintModal'
-import { headerToken, decrypt } from 'utils/helper'
+import { headerToken } from 'utils/helper'
 import {connectToMetamask, getAccountStatus, getContractStatus} from 'actions/contract'
 import { useDispatch, useSelector } from 'react-redux'
 import axios from 'axios'

@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
-import { BrainDance, connectToWallet } from 'utils/web3_api'
+import { BrainDance } from 'utils/web3_api'
 import Loader from 'components/Loader'
 import contractConfig from 'contracts/config.json'
 import api from 'utils/api'
 import './Admin.scoped.scss'
 import { decrypt, headerToken } from 'utils/helper'
 import { NotificationManager } from 'components/Notification'
-import {connectToMetamask, getAccountStatus, getContractStatus} from 'actions/contract'
-import { useDispatch, useSelector } from 'react-redux'
+import {connectToMetamask} from 'actions/contract'
+import { useDispatch, useSelector } from "react-redux"
 
 const wnd = window as any
 
@@ -41,10 +41,10 @@ const Admin = (props: Props) => {
       console.log(ex)
       NotificationManager.error('Operation was not done successfully', 'Error')
     }
-    setLoading(false)
+    setLoading(false);
   }
 
-  const handleGetRoot = async (statusFlag: number) => {
+  const handleGetRoot = async (statusFlag: number, bSet: boolean) => {
     setLoading(true)
     try {
       const url = statusFlag === 4 ? '/admin/get-sign-root' : '/admin/get-whitelist-root'
@@ -55,13 +55,18 @@ const Admin = (props: Props) => {
       }, {
         headers: headerToken(addr)
       })
-      NotificationManager.success('Operation was done successfully', 'Success')
+
       setRootValue(data.root)
+
+      if (bSet) {
+        const contractBD = new BrainDance(contract)
+        statusFlag === 4 ? contractBD.setRootSign(addr, data.root) : contractBD.setRootVip(addr, statusFlag, data.root)
+      }
     } catch (ex) {
       console.log(ex)
       NotificationManager.error('Operation was not done successfully', 'Error')
     }
-    setLoading(false)
+    setLoading(false);
   }
   
   const handleUpgrade = async () => {
@@ -112,28 +117,36 @@ const Admin = (props: Props) => {
   const isOwner = () => {
     const addr = "0x52A9351CCF73Db3f0ab25977a30eE592c3F1b9fa".toLowerCase();
     const deployer = contractConfig.deployer.toLowerCase();
-    const curAddr = window.ethereum.selectedAddress.toLowerCase();
+    const curAddr = window?.ethereum?.selectedAddress?.toLowerCase();
     return [addr, deployer].includes(curAddr);
   }
 
   return (
     <div className='home-page'>
       {isOwner() && (
-        <>
+        <div>
           <div>
+            <h2>Step</h2>
             <button type='button' onClick={() => handleSetStatus(1)}>start VIP1</button>
             <button type='button' onClick={() => handleSetStatus(2)}>start VIP2</button>
             <button type='button' onClick={() => handleSetStatus(3)}>start VIP3</button>
             <button type='button' onClick={() => handleSetStatus(4)}>start Public Sale</button>
           </div>
           <div>
-            <button type='button' onClick={() => handleGetRoot(1)}>Get Sign VIP1</button>
-            <button type='button' onClick={() => handleGetRoot(2)}>Get Sign VIP2</button>
-            <button type='button' onClick={() => handleGetRoot(3)}>Get Sign VIP3</button>
-            <button type='button' onClick={() => handleGetRoot(4)}>Get Sign</button>
-            <span>{rootValue}</span>
+            <h2>Get Root Sign <span style={{fontSize: '16px', fontWeight: 'normal'}}>{rootValue}</span></h2>
+            <button type='button' onClick={() => handleGetRoot(1, false)}>Get Sign VIP1</button>
+            <button type='button' onClick={() => handleGetRoot(2, false)}>Get Sign VIP2</button>
+            <button type='button' onClick={() => handleGetRoot(3, false)}>Get Sign VIP3</button>
+            <button type='button' onClick={() => handleGetRoot(4, false)}>Get Sign</button>
           </div>
-        </>
+          <div>
+            <h2>Set Root Sign <span style={{fontSize: '16px', fontWeight: 'normal'}}>{rootValue}</span></h2>
+            <button type='button' onClick={() => handleGetRoot(1, true)}>Set Sign VIP1</button>
+            <button type='button' onClick={() => handleGetRoot(2, true)}>Set Sign VIP2</button>
+            <button type='button' onClick={() => handleGetRoot(3, true)}>Set Sign VIP3</button>
+            <button type='button' onClick={() => handleGetRoot(4, true)}>Set Sign</button>
+          </div>
+        </div>
       )}
       <div>
         <button type='button' onClick={handleUpgrade}>upgrade</button>
