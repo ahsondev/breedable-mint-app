@@ -1,8 +1,6 @@
 import { actionTypes } from 'utils/config'
 import { connectToWallet } from 'utils/web3_api'
 
-const wnd: any = window as any
-
 export const connectToMetamask = () => (dispatch: any) => new Promise((resolve, reject) => {
   connectToWallet().then((res: any) => {
     dispatch({
@@ -60,9 +58,11 @@ export const getAccountStatus = (contract: any, account: string) => (dispatch: a
   try {
     const statusFlag = Number(await contract.methods.statusFlag().call())
     const stepBalance = Number(await contract.methods.stepBalance(statusFlag, account).call())
+    const balance = Number(await contract.methods.balanceOf(account).call())
 
     const payload = {
       stepBalance,
+      balance,
     }
 
     dispatch({

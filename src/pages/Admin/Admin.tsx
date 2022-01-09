@@ -71,35 +71,18 @@ const Admin = (props: Props) => {
   }
   
   const handleUpgrade = async () => {
-    const {data} = await api.get('/token')
-    const sign = decrypt(data.token)
-    const tokenUri = "/upgrade"
-    const tokenId = 1
-    const heroTraits = 0
-    const heroBirthday = 1
-    const fId = 1
-    const mId = 2
-    const cIds = [3, 4]
-    const reset = false
+    setLoading(true)
+    const addr = window.ethereum.selectedAddress;
+    const {data} = await api.post('/admin/get-proof', {
+      address: addr,
+    }, {
+      headers: headerToken(addr)
+    });
 
-    console.log({sign})
-    const tx = {
-      from: window.ethereum.selectedAddress,
-      to: contractConfig.contractAddress,
-      data: contract.methods.setToken(sign, tokenId, tokenUri, heroTraits, heroBirthday, fId, mId, cIds, reset).encodeABI(),
-    }
-
-    return web3.eth.sendTransaction(tx)
-  }
-
-  const handleBreed = async () => {
-    const {data} = await api.get('/token')
-    const sign = decrypt(data.token)
-    const tokenUri = "https://braindance.mypinata.cloud/ipfs/QmTUCeRzdte43ngBLctLSSzMzs1JrRjkexryCNzXgMj4UH/9999"
+    const tokenUri = "https://braindance.mypinata.cloud/ipfs/QmTUCeRzdte43ngBLctLSSzMzs1JrRjkexryCNzXgMj4UH/9998"
     const heroId1 = 1
-    const heroId2 = 2
+    const heroId2 = 3
 
-    console.log({sign})
     const nonce = await web3.eth.getTransactionCount(window.ethereum.selectedAddress, 'latest'); // nonce starts counting from 0
     const tx = {
       from: window.ethereum.selectedAddress,
@@ -109,10 +92,40 @@ const Admin = (props: Props) => {
       maxPriorityFeePerGas: 1999999987,
       nonce,
       // data: contract.methods.mintBreedToken(sign, tokenUri, heroId1, heroId2).encodeABI(),
-      data: contract.methods.mintBreedToken(sign, tokenUri, heroId1, heroId2).encodeABI(),
+      data: contract.methods.setToken(data.proof, data.leaf, 1, tokenUri, 0, heroId1, heroId2, true).encodeABI(),
     }
 
-    return web3.eth.sendTransaction(tx)
+    await web3.eth.sendTransaction(tx);
+    setLoading(false);
+  }
+
+  const handleBreed = async () => {
+    setLoading(true)
+    const addr = window.ethereum.selectedAddress;
+    const {data} = await api.post('/admin/get-proof', {
+      address: addr,
+    }, {
+      headers: headerToken(addr)
+    });
+
+    const tokenUri = "https://braindance.mypinata.cloud/ipfs/QmTUCeRzdte43ngBLctLSSzMzs1JrRjkexryCNzXgMj4UH/9999"
+    const heroId1 = 1
+    const heroId2 = 2
+
+    const nonce = await web3.eth.getTransactionCount(window.ethereum.selectedAddress, 'latest'); // nonce starts counting from 0
+    const tx = {
+      from: window.ethereum.selectedAddress,
+      to: contractConfig.contractAddress,
+      value: 0,
+      gas: 300000,
+      maxPriorityFeePerGas: 1999999987,
+      nonce,
+      // data: contract.methods.mintBreedToken(sign, tokenUri, heroId1, heroId2).encodeABI(),
+      data: contract.methods.mintBreedToken(data.proof, data.leaf, tokenUri, heroId1, heroId2).encodeABI(),
+    }
+
+    await web3.eth.sendTransaction(tx);
+    setLoading(false);
   }
 
   const isOwner = () => {

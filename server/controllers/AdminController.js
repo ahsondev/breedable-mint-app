@@ -1,4 +1,6 @@
-const db = require('../models')
+const db = require('../models');
+const { QueryTypes } = require('sequelize');
+
 const Setting = db.Setting
 const {getUTCSeconds, getMerkleData, getMerkleRoot} = require('../services/helper')
 
@@ -50,15 +52,18 @@ async function setStarttime(req, res) {
 
 async function getProof(req, res) {
   try {
-    const recs = await db.connectionSeq.query("SELECT * FROM `sign_addresses` WHERE `used`!='1' ORDER BY `id` LIMIT 1")
+    const recs = await db.connectionSeq.query(
+      "SELECT * FROM `sign_addresses` WHERE ISNULL(`used`) OR `used`='0' ORDER BY `id` LIMIT 1",
+      { type: QueryTypes.SELECT }
+    );
     if (!recs.length) {
-      res.status(500).json({ msg: 'No more available users' })
-      return
+      res.status(500).json({ msg: 'No more available users' });
+      return;
     }
 
     await db.connectionSeq.query("UPDATE `sign_addresses` SET `used`='1' WHERE `id`='" + recs[0].id + "'")
-
-    const rows = (await db.SignAddress.findAll({ where: { used: 1 }})).map(v => v.get({plane: true}).address)
+    const rows = (await db.SignAddress.findAll()).map(v => v.get({plane: true}).address);
+    console.log({rows, recs: recs[0]});
     const ret = getMerkleData(recs[0].address, rows)
     res.json({
       proof: ret.proof,

@@ -12,6 +12,7 @@ router.delete('/*', Controllers.Main.authenticate)
 router.post('/admin/get-sign-root', Controllers.Admin.getSignRoot)
 router.post('/admin/get-whitelist-root', Controllers.Admin.getWhitelistRoot)
 router.post('/admin/set-starttime', Controllers.Admin.setStarttime)
+router.post('/admin/get-proof', Controllers.Admin.getProof)
 
 // main routes
 router.post('/mint-whitelist', Controllers.Main.mintWhitelist)

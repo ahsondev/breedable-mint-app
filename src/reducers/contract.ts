@@ -12,6 +12,7 @@ const initialState = {
   countLimit: 0,
   INITIAL_TOKEN_COUNT: 0,
   stepBalance: 0,
+  balance: 0,
 }
 
 const contract = (state = initialState, action: ActionType) => {

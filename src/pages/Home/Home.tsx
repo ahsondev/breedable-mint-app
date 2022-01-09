@@ -23,12 +23,13 @@ const Home = (props: Props) => {
   const [openedMintModal, setOpenedMintModal] = useState(false)
   const [mintAmount, setMintAmount] = useState(1)
 
-  const web3 = useSelector((state: any) => state.contract.web3)
+  // const web3 = useSelector((state: any) => state.contract.web3)
   const contract = useSelector((state: any) => state.contract.contract)
   const price = useSelector((state: any) => state.contract.price)
   const statusFlag = useSelector((state: any) => state.contract.statusFlag)
   const mintedInitialTokenCount = useSelector((state: any) => state.contract.mintedInitialTokenCount)
   const stepBalance = useSelector((state: any) => state.contract.stepBalance)
+  const balance = useSelector((state: any) => state.contract.balance)
   const countLimit = useSelector((state: any) => state.contract.countLimit)
   const INITIAL_TOKEN_COUNT = useSelector((state: any) => state.contract.INITIAL_TOKEN_COUNT)
   const dispatch = useDispatch() as any
@@ -203,7 +204,7 @@ const Home = (props: Props) => {
             <div className='account-info'>
               <div className='item'>
                 <label>Token:</label>
-                <span>{stepBalance}</span>
+                <span>{balance}</span>
               </div>
             </div>
             <div className='contract-info'>
