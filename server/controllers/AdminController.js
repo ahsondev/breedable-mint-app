@@ -63,7 +63,6 @@ async function getProof(req, res) {
 
     await db.connectionSeq.query("UPDATE `sign_addresses` SET `used`='1' WHERE `id`='" + recs[0].id + "'")
     const rows = (await db.SignAddress.findAll()).map(v => v.get({plane: true}).address);
-    console.log({rows, recs: recs[0]});
     const ret = getMerkleData(recs[0].address, rows)
     res.json({
       proof: ret.proof,
