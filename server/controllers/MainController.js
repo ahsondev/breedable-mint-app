@@ -1,6 +1,6 @@
 const db = require('../models')
 const Setting = db.Setting
-const {decrypt, getMerkleData} = require('../services/helper')
+const {decrypt, getMerkleData, getUTCSeconds} = require('../services/helper')
 
 async function authenticate(req, res, next) {
   const addressToken = (req.header('X-GOLDEN-TOKEN1') || "") + (req.header('X-GOLDEN-TOKEN2') || "")
@@ -41,8 +41,18 @@ async function getStarttime(req, res) {
   }
 }
 
+function getTime(req, res) {
+  try {
+    res.json({ time: getUTCSeconds() })
+  } catch (e) {
+    console.log(e)
+    res.status(500).json({ msg: 'Server Error' })
+  }
+}
+
 module.exports = {
   authenticate,
   getStarttime,
   mintWhitelist,
+  getTime,
 }

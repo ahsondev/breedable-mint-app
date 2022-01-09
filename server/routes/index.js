@@ -17,5 +17,6 @@ router.post('/admin/get-proof', Controllers.Admin.getProof)
 // main routes
 router.post('/mint-whitelist', Controllers.Main.mintWhitelist)
 router.get('/get-starttime', Controllers.Main.getStarttime)
+router.get('/get-time', Controllers.Main.getTime)
 
 module.exports = router;

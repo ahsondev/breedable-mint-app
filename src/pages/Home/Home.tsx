@@ -80,8 +80,8 @@ const Home = (props: Props) => {
     ;(async () => {
       const res = await await api.get('/get-starttime');
       setStartTime(Number(res.data.starttime));
-      const {data} = await axios.get('http://worldtimeapi.org/api/timezone/gmt')
-      const currentTime = Math.round((new Date(data.utc_datetime)).getTime() / 1000)
+      const {data} = await api.get('/get-time')
+      const currentTime = data.time;
       
       const periods = [0, 48, 48, 48, 48]
       setSaleTimer(Number(res.data.starttime) - currentTime + periods[statusFlag] * 3600)

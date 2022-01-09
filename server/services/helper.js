@@ -21,13 +21,13 @@ const round = (v, digits) => {
   return Math.round(v * factorial) / factorial
 }
 
-const getUTCSeconds = async () => {
+const getUTCSeconds = () => {
   let date = new Date()
-  try {
-    const {data} = await axios.get('http://worldtimeapi.org/api/timezone/gmt')
-    date = new Date(data.utc_datetime)
-  } catch (e) {
-  }
+  // try {
+  //   // const {data} = await axios.get('https://worldtimeapi.org/api/timezone/gmt')
+  //   // date = new Date(data.utc_datetime)
+  // } catch (e) {
+  // }
   return Math.floor(date.getTime() / 1000)
 }
 
